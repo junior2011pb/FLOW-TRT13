@@ -1,145 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <base target="_top">
   <meta charset="utf-8">
-  <title>FLOW - Escalonamento de Filas SETIC</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #e2e8f0; color: #2d3748; }
-
-    .header {
-      background: linear-gradient(145deg, #0d253f, #1a4a7a);
-      color: #ffffff;
-      padding: 35px 20px 45px 20px;
-      text-align: center;
-      position: relative;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-    }
-    
-    .logo-container {
-      position: absolute; top: 15px; left: 20px;
-      display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(145deg, #0a1e33, #113254);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px; padding: 6px 14px; max-width: 220px; min-height: 55px;
-    }
-    .logo-container img { max-height: 48px; max-width: 100%; object-fit: contain; }
-    .logo-placeholder-text { font-size: 0.72rem; font-weight: 700; color: #cbd5e1; text-transform: uppercase; }
-
-    .top-right-nav {
-      position: absolute; top: 15px; right: 20px;
-      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    }
-
-    .btn-base, .btn-admin, .btn-add, .btn-change-logo, .btn-change-pass {
-      padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;
-      cursor: pointer; text-decoration: none; border: none; transition: all 0.15s;
-    }
-
-    .btn-base-publica { background: linear-gradient(145deg, #f04898, #d62d7a); color: white; }
-    .btn-base-privada { background: linear-gradient(145deg, #00d2ff, #0099cc); color: white; }
-    .btn-admin { background: linear-gradient(145deg, #3a506b, #1c2d42); color: white; }
-    .btn-add { background: linear-gradient(145deg, #2ecc71, #27ae60); color: white; display: none; }
-    .btn-change-logo { background: linear-gradient(145deg, #ffaa00, #e67e22); color: white; display: none; }
-    .btn-change-pass { background: linear-gradient(145deg, #8e44ad, #6c3483); color: white; display: none; }
-
-    .header h1 { font-size: 2.2rem; margin-top: 10px; margin-bottom: 6px; letter-spacing: 1px; }
-    .header p { font-size: 0.95rem; opacity: 0.9; margin-bottom: 25px; }
-
-    .search-box { max-width: 650px; margin: 0 auto; }
-    .search-input {
-      width: 100%; padding: 15px 25px; font-size: 1rem; border: none;
-      border-radius: 30px; outline: none; background: #ffffff;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    }
-
-    .container { max-width: 1250px; margin: 35px auto; padding: 0 20px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 25px; }
-    .card {
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-      border-radius: 14px; padding: 22px; box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-      display: flex; flex-direction: column; justify-content: space-between;
-      border-top: 5px solid #1a4a7a; position: relative; transition: all 0.3s;
-    }
-    .card:hover { transform: translateY(-8px); box-shadow: 0 18px 30px rgba(0,0,0,0.15); }
-
-    .card-actions { display: none; position: absolute; top: 12px; right: 12px; gap: 6px; }
-    .btn-card { border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer; color: white; }
-    .btn-edit { background: linear-gradient(145deg, #f1c40f, #f39c12); color: #111; }
-    .btn-delete { background: linear-gradient(145deg, #e74c3c, #c0392b); }
-
-    .card-title { font-size: 1.2rem; font-weight: 800; color: #0d253f; }
-    .badge-access { background: #e2e8f0; color: #1e293b; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 12px; }
-    .card-desc { font-size: 0.875rem; color: #475569; margin: 10px 0 14px 0; }
-    .btn-link {
-      display: inline-block; text-align: center; background: linear-gradient(145deg, #1a4a7a, #0d253f);
-      color: white; text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; margin-bottom: 14px;
-    }
-
-    .flow-container { border-top: 2px dashed #cbd5e1; padding-top: 14px; margin-top: 12px; }
-    .flow-title { font-size: 0.72rem; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 12px; }
-    .flow-step { background: #ffffff; border-left: 4px solid #1a4a7a; padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; font-size: 0.825rem; }
-    .flow-step.level-1 { border-left-color: #64748b; background: #f1f5f9; }
-    .step-level { font-weight: 800; color: #1a4a7a; }
-    .step-queue { font-weight: 700; color: #0f172a; }
-    .step-resp { color: #475569; margin-top: 4px; font-size: 0.8rem; }
-
-    .obs-box { margin-top: 12px; background: #fff9c4; border: 1px solid #ffe082; padding: 10px; border-radius: 8px; font-size: 0.775rem; color: #7f6000; }
-    .status-msg { text-align: center; padding: 40px; font-size: 1.1rem; color: #64748b; font-weight: 600; }
-
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000;
-    }
-    .modal { background: #ffffff; padding: 28px; border-radius: 16px; width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; }
-    .modal h3 { margin-bottom: 18px; color: #0d253f; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; }
-
-    .fluxo-section { border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; background: #f8fafc; margin-top: 18px; }
-    .fluxo-section-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
-    .btn-add-fluxo { background: #0072ff; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; }
-    .fluxo-row { display: flex; gap: 8px; margin-bottom: 10px; }
-    .fluxo-row input { padding: 8px; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 6px; }
-    .fluxo-col-nivel { flex: 1.2; } .fluxo-col-fila { flex: 2; } .fluxo-col-resp { flex: 2.5; }
-    .btn-remove-fluxo { background: #ff4b2b; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-
-    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 22px; }
-    .btn-sec { background: #64748b; color: white; border: none; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; }
-    .btn-pri { background: #0d253f; color: white; border: none; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; }
-  </style>
-</head>
-<body>
-
-  <div class="header">
-    <div class="logo-container" id="logoContainer">
-      <img id="logoImg" src="" alt="Logo TRT13" style="display: none;">
-      <span id="logoText" class="logo-placeholder-text">FLOW — TRT13</span>
-    </div>
-
-    <div class="top-right-nav">
-      <a href="https://conhecimento-setic.trt13.jus.br/" target="_blank" class="btn-base btn-base-publica">BASE PÚBLICA</a>
-      <a href="https://conhecimento-dau.trt13.jus.br/" target="_blank" class="btn-base btn-base-privada">BASE PRIVADA</a>
-      
-      <input type="file" id="logoFileInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
-      <button id="btnChangeLogo" class="btn-change-logo" onclick="document.getElementById('logoFileInput').click()">Alterar Logo</button>
-      <button id="btnChangePass" class="btn-change-pass" onclick="openChangePassModal()">Alterar Senha</button>
-
-      <button id="btnAdd" class="btn-add" onclick="openEditModal()">+ Novo Sistema</button>
-      <button id="btnLogin" class="btn-admin" onclick="toggleLogin()">Entrar</button>
-    </div>
-
-    <h1>FLOW</h1>
-    <p>Escalonamento de Filas SETIC TRT-13 — Hierarquia de Atendimento e Responsáveis</
-
-cat << 'EOF' > Index.html
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <base target="_top">
-  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FLOW - Escalonamento de Filas SETIC</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -334,22 +197,44 @@ cat << 'EOF' > Index.html
   </div>
 
   <script>
-    let globalData = []; let isAdmin = false;
+    let globalData = [];
+    let isAdmin = false;
+
+    const DADOS_PADRAO = [
+      { id: "sys_1", sistema: "Aud", descricao: "Sistema de audiências da Justiça do Trabalho (Sistema Satélite do PJe)", url: "https://pje.trt13.jus.br/aud/", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
+      { id: "sys_2", sistema: "Audiência Digital", descricao: "Sistema para envio das mídias de audiências para o PJe Mídias", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }] },
+      { id: "sys_3", sistema: "Ccalc", descricao: "Sistema para distribuição dos cálculos dos processos para os calculistas.", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }] },
+      { id: "sys_4", sistema: "Central de Mandados", descricao: "Módulo do PJe para distribuição dos mandados.", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }] },
+      { id: "sys_5", sistema: "eCartas", descricao: "Integração do PJe com os correios.", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }] },
+      { id: "sys_6", sistema: "GPrec", descricao: "Sistema de Gestão de Precatórios e RPV (Sistema Satélite do PJe)", url: "https://pje.trt13.jus.br/gprec/", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }] },
+      { id: "sys_7", sistema: "PJe 1º Grau", descricao: "Sistema de Processos Judiciais Eletrônicos da JT", url: "https://pje.trt13.jus.br/primeirograu/", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }] },
+      { id: "sys_8", sistema: "PJe-Calc", descricao: "Módulo do PJe que realiza os cálculos dos processos.", url: "https://pje.trt13.jus.br/pjecalc/", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }] },
+      { id: "sys_9", sistema: "PJe Mídias", descricao: "Armazena vídeos de audiências e sessões", url: "https://midias.pje.jus.br/midias/web/site/login", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }] }
+    ];
 
     document.addEventListener("DOMContentLoaded", function() {
-      if (localStorage.getItem("is_admin") === "true") { isAdmin = true; updateAdminUI(); }
+      if (localStorage.getItem("flow_is_admin") === "true") {
+        isAdmin = true;
+        updateAdminUI();
+      }
       loadData();
     });
 
     function loadData() {
-      google.script.run.withSuccessHandler(function(response) {
-        if (response.logo) displayLogo(response.logo);
-        renderCards(response.itens);
-      }).getDados();
+      const storedData = localStorage.getItem("flow_custom_dados");
+      globalData = storedData ? JSON.parse(storedData) : DADOS_PADRAO;
+
+      const storedLogo = localStorage.getItem("flow_custom_logo");
+      if (storedLogo) displayLogo(storedLogo);
+
+      renderCards(globalData);
+    }
+
+    function saveData() {
+      localStorage.setItem("flow_custom_dados", JSON.stringify(globalData));
     }
 
     function renderCards(data) {
-      globalData = data;
       document.getElementById('loading').style.display = 'none';
       const container = document.getElementById('cardsContainer');
       container.style.display = 'grid'; container.innerHTML = '';
@@ -399,8 +284,9 @@ cat << 'EOF' > Index.html
       const file = event.target.files[0]; if (!file) return;
       const reader = new FileReader();
       reader.onload = function(e) {
-        const base64 = e.target.result; displayLogo(base64);
-        google.script.run.salvarLogoServer(base64);
+        const base64 = e.target.result;
+        displayLogo(base64);
+        localStorage.setItem("flow_custom_logo", base64);
       };
       reader.readAsDataURL(file);
     }
@@ -411,16 +297,28 @@ cat << 'EOF' > Index.html
     }
 
     function toggleLogin() {
-      if (isAdmin) { isAdmin = false; localStorage.setItem("is_admin", "false"); updateAdminUI(); }
-      else { document.getElementById('loginModal').style.display = 'flex'; }
+      if (isAdmin) {
+        isAdmin = false;
+        localStorage.setItem("flow_is_admin", "false");
+        updateAdminUI();
+      } else {
+        document.getElementById('loginModal').style.display = 'flex';
+      }
     }
 
     function submitLogin() {
-      const u = document.getElementById('loginUser').value; const p = document.getElementById('loginPass').value;
-      google.script.run.withSuccessHandler(function(res) {
-        if (res && res.sucesso) { isAdmin = true; localStorage.setItem("is_admin", "true"); closeLoginModal(); updateAdminUI(); }
-        else { document.getElementById('loginError').style.display = 'block'; }
-      }).autenticarAdmin(u, p);
+      const u = document.getElementById('loginUser').value;
+      const p = document.getElementById('loginPass').value;
+      const senhaSalva = localStorage.getItem("flow_senha_admin") || "admin12345678";
+
+      if (u === "admin" && p === senhaSalva) {
+        isAdmin = true;
+        localStorage.setItem("flow_is_admin", "true");
+        closeLoginModal();
+        updateAdminUI();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
     }
 
     function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
@@ -428,10 +326,17 @@ cat << 'EOF' > Index.html
     function closeChangePassModal() { document.getElementById('changePassModal').style.display = 'none'; }
 
     function submitChangePass() {
-      const a = document.getElementById('passAtual').value; const n = document.getElementById('passNova').value;
-      google.script.run.withSuccessHandler(function(res) {
-        alert(res.mensagem); if (res.sucesso) closeChangePassModal();
-      }).alterarSenhaAdmin(a, n);
+      const a = document.getElementById('passAtual').value;
+      const n = document.getElementById('passNova').value;
+      const senhaSalva = localStorage.getItem("flow_senha_admin") || "admin12345678";
+
+      if (a !== senhaSalva) {
+        alert("A senha atual informada está incorreta.");
+        return;
+      }
+      localStorage.setItem("flow_senha_admin", n);
+      alert("Senha alterada com sucesso!");
+      closeChangePassModal();
     }
 
     function updateAdminUI() {
@@ -513,13 +418,16 @@ cat << 'EOF' > Index.html
         });
       }
 
-      google.script.run.withSuccessHandler(() => { closeEditModal(); renderCards(globalData); }).salvarDados(globalData);
+      saveData();
+      closeEditModal();
+      renderCards(globalData);
     }
 
     function deleteItem(id) {
       if (!confirm('Deseja excluir este registro?')) return;
       globalData = globalData.filter(x => x.id !== id);
-      google.script.run.withSuccessHandler(() => { renderCards(globalData); }).salvarDados(globalData);
+      saveData();
+      renderCards(globalData);
     }
 
     function filterCards() {
