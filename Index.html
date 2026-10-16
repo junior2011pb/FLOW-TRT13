@@ -16,7 +16,7 @@
       position: relative;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
     }
-    
+
     .logo-container {
       position: absolute; top: 15px; left: 20px;
       display: flex; align-items: center; justify-content: center;
@@ -122,7 +122,7 @@
     <div class="top-right-nav">
       <a href="https://conhecimento-setic.trt13.jus.br/" target="_blank" class="btn-base btn-base-publica">BASE PÚBLICA</a>
       <a href="https://conhecimento-dau.trt13.jus.br/" target="_blank" class="btn-base btn-base-privada">BASE PRIVADA</a>
-      
+
       <input type="file" id="logoFileInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
       <button id="btnChangeLogo" class="btn-change-logo" onclick="document.getElementById('logoFileInput').click()">Alterar Logo</button>
       <button id="btnChangePass" class="btn-change-pass" onclick="openChangePassModal()">Alterar Senha</button>
@@ -133,7 +133,7 @@
 
     <h1>FLOW</h1>
     <p>Escalonamento de Filas SETIC TRT-13 — Hierarquia de Atendimento e Responsáveis</p>
-    
+
     <div class="search-box">
       <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar por sistema, módulo, fila ou responsável..." onkeyup="filterCards()">
     </div>
@@ -179,6 +179,7 @@
       <div class="form-group"><label>Acesso</label><input type="text" id="editAcesso"></div>
       <div class="form-group"><label>Descrição</label><textarea id="editDesc" rows="2"></textarea></div>
       <div class="form-group"><label>URL / Link</label><input type="text" id="editUrl"></div>
+      <div class="form-group"><label>Responsável</label><input type="text" id="editResponsavel"></div>
       <div class="form-group"><label>Observação</label><input type="text" id="editObs"></div>
 
       <div class="fluxo-section">
@@ -230,6 +231,138 @@
       { id: "sys_22", sistema: "Sisaval", descricao: "Avaliação de desempenho dos servidores do tribunal", url: "https://apps.trt13.jus.br/sisavalng", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Squad - SEGEPE e Folha", resp: "Lucas Farias, Wagner Porto, Jorge Flávio" }] }
     ];
 
+    const EQUIPES = {
+      pje: ["PJE 2º Nível", "Squad - PJe"],
+      corregedoria: ["PJE 2º Nível", "Squad - Corregedoria e Estatísticas"],
+      segepe: ["Squad - SEGEPE e Folha", "Squad - SEGEPE e Folha"],
+      acs: ["ACS", ""],
+      portais: ["Squad - Portais", "Squad - Portais"],
+      processo: ["Squad - Processo Adm e Outros", "Squad - Processo Adm e Outros"],
+      citic: ["Squad - Processo Adm e Outros", "CITIC"],
+      ia: ["NIA - Núcleo de Inteligência Artificial", "NIA - Núcleo de Inteligência Artificial"],
+      dau: ["DAU", ""],
+      dauEjud: ["DAU", "DAU avaliar se repassa para Sílvio da EJUD"],
+      dauProcesso: ["DAU", "Squad - Processo Adm e Outros"],
+      dauCitic: ["DAU", "CITIC"]
+    };
+
+    function criarSistema(id, sistema, descricao = "", url = "", acesso = "Só gestores", equipe = "pje", responsavel = "") {
+      const [fila2, fila3] = EQUIPES[equipe];
+      const fluxo = [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }];
+      if (fila2) fluxo.push({ nivel: "2º Nível", fila: fila2, resp: "" });
+      if (fila3) fluxo.push({ nivel: "3º Nível", fila: fila3, resp: "" });
+      return { id, sistema, descricao, url, acesso, responsavel, obs: "", fluxo };
+    }
+
+    const RESPONSAVEIS_PADRAO = {
+      sys_1: "Felipe Barbosa",
+      sys_2: "Washington",
+      sys_3: "Frederico Pereira",
+      sys_17: "Hugo Nóbrega",
+      sys_20: "Lucas Farias",
+      sys_21: "Wagner Porto"
+    };
+    DADOS_PADRAO.forEach(item => {
+      item.responsavel = RESPONSAVEIS_PADRAO[item.id] || item.responsavel || "";
+      const numero = Number(item.id.replace("sys_", ""));
+      const equipe = numero <= 19 ? "pje" : "segepe";
+      const [fila2, fila3] = EQUIPES[equipe];
+      item.fluxo = [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }];
+      if (fila2) item.fluxo.push({ nivel: "2º Nível", fila: fila2, resp: "" });
+      if (fila3) item.fluxo.push({ nivel: "3º Nível", fila: fila3, resp: "" });
+    });
+
+    DADOS_PADRAO.push(
+      criarSistema("sys_23", "Migrador Avulso de processos da CCLE"),
+      criarSistema("sys_24", "PJe Gestão"),
+      criarSistema("sys_25", "SAO PJE 1º Grau - Relatórios", "Relatórios do SAO PJE referentes a questões do 1º grau."),
+      criarSistema("sys_26", "SIF (Sistema de Interoperabilidade Financeira)", "Módulo de integração do PJe com a Caixa Econômica Federal para emissão de boletos (guias de depósito judicial) e expedição de alvarás."),
+      criarSistema("sys_27", "PJe-RS"),
+      criarSistema("sys_28", "Solaria", "RJs (Robôs Judiciários) implantados no TRT-13."),
+      criarSistema("sys_29", "Serp-JUD", "Sistema Eletrônico dos Registros Públicos criado pelo CNJ, que moderniza e simplifica procedimentos relativos a registros públicos e incorporações imobiliárias."),
+      criarSistema("sys_30", "Assistente de Cópia PJe", "", "", "Só gestores", "pje", "Bruno Coutinho"),
+      criarSistema("sys_31", "Jurisprudência", "", "", "Só gestores", "pje", "Lucas Anderson"),
+      criarSistema("sys_32", "SisAudio"),
+      criarSistema("sys_33", "Sustentação Oral no Pleno"),
+      criarSistema("sys_34", "SAO ADM - Sistema"),
+      criarSistema("sys_35", "SAO PJE - Sistema"),
+      criarSistema("sys_36", "PJe Admissibilidade"),
+      criarSistema("sys_37", "Unificador de PDF"),
+      criarSistema("sys_38", "SAO PJE 2º Grau - Relatórios"),
+      criarSistema("sys_39", "eRec"),
+      criarSistema("sys_40", "Preá"),
+      criarSistema("sys_41", "PACO"),
+      criarSistema("sys_42", "Migração de RP do GPREC"),
+      criarSistema("sys_43", "DataJud", "", "", "Só gestores", "corregedoria", "Denis"),
+      criarSistema("sys_44", "HorusJud", "", "", "Só gestores", "corregedoria", "Andrei"),
+      criarSistema("sys_45", "GEC - Ata de Correição Automática", "Sistema de Geração de Atas de Correição.", "", "Só gestores", "corregedoria", "Wagner Régis"),
+      criarSistema("sys_46", "Extrator eGestão", "", "", "Só gestores", "corregedoria"),
+      criarSistema("sys_47", "Garimpo", "", "", "Só gestores", "corregedoria"),
+      criarSistema("sys_48", "MPM - Módulo de Produtividade Mensal", "", "", "Só gestores", "corregedoria"),
+      criarSistema("sys_49", "SIGEO - AJJT", "", "", "Só gestores", "corregedoria"),
+      criarSistema("sys_50", "Codex", "", "", "Só gestores", "corregedoria"),
+      criarSistema("sys_51", "BI do SIMBA", "Implantação e configuração do BI do SIMBA em máquinas individuais.", "", "Só gestores", "corregedoria"),
+      criarSistema("sys_52", "Dashboards e Power BI", "", "", "Só gestores", "corregedoria"),
+      criarSistema("sys_53", "SIGS", "", "", "Só gestores", "segepe", "Jorge Flávio"),
+      criarSistema("sys_54", "DMAG - Designação de Magistrados", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_55", "GAA - Gestão de Atos Administrativos", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_56", "GECJ", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_57", "ACIP", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_58", "Simulador Aposentadoria", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_59", "GEST - Gestão de Estagiários", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_60", "SisRec", "Permite a autorização e o registro de empréstimos consignados.", "", "Só gestores", "segepe"),
+      criarSistema("sys_61", "Gestão de Passivos", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_62", "eSocial", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_63", "Simulador de BE", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_64", "SISEJUD", "Módulo do SIGEP para controle de capacitações utilizado pelas Escolas Judiciais.", "https://sisejud.trt13.jus.br/ejud/", "Só gestores", "segepe"),
+      criarSistema("sys_65", "PROGECOM - HOMOLOGAÇÃO", "Programa de Gestão por Competências utilizado para gerir as competências dos servidores do tribunal.", "https://sistemas-hml.trt13.jus.br/progecom/", "Só gestores", "segepe"),
+      criarSistema("sys_66", "SAO ADM - Relatórios (Cadastro e Folha)", "Relatórios referentes a cadastro de pessoal e folha de pagamento.", "", "Só gestores", "segepe"),
+      criarSistema("sys_67", "AutoAtendimento", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_68", "SIGEP-rs", "", "", "Só gestores", "segepe"),
+      criarSistema("sys_69", "Portal da Internet", "", "", "Só gestores", "acs", "Miguel"),
+      criarSistema("sys_70", "Portal da Intranet", "", "", "Só gestores", "acs", "José Rafael"),
+      criarSistema("sys_71", "WikiAdm", "", "", "Só gestores", "portais", "Thiago Lins"),
+      criarSistema("sys_72", "Portal de Serviços", "Consulta processual e de protocolo no sistema legado.", "", "Só gestores", "processo", "Caio Caroca"),
+      criarSistema("sys_73", "PROAD", "", "", "Só gestores", "processo", "Sebastião"),
+      criarSistema("sys_74", "SisAQ", "Controle de capacitações dos servidores em relação a blocos de AQ e horas excedentes.", "", "Só gestores", "processo", "Gleydson"),
+      criarSistema("sys_75", "Banco de Talentos", "Permite registrar competências e habilidades dos servidores para melhor alocação da força de trabalho.", "", "Só gestores", "processo", "Juliana"),
+      criarSistema("sys_76", "SAF", "", "", "Só gestores", "processo"),
+      criarSistema("sys_77", "Consulta Aniversário", "", "", "Só gestores", "processo"),
+      criarSistema("sys_78", "e-Transporte", "Gerencia pedidos de deslocamento de servidores e equipamentos por meio dos veículos oficiais.", "", "Só gestores", "processo"),
+      criarSistema("sys_79", "Cadastro de Cursos", "Facilita o cadastro de cursos internos não promovidos pela EJUD no SIGEP.", "", "Só gestores", "processo"),
+      criarSistema("sys_80", "Ouvidoria", "", "", "Só gestores", "processo"),
+      criarSistema("sys_81", "Archivematica/Atom", "", "", "Só gestores", "processo"),
+      criarSistema("sys_82", "Normas Internas", "Disponibiliza normas do tribunal de forma indexada e pesquisável.", "https://normasinternas.trt13.jus.br/", "Só gestores", "processo"),
+      criarSistema("sys_83", "Sisport", "Registro de ocorrências e controle de entrada e saída de visitantes pela portaria.", "", "Só gestores", "processo"),
+      criarSistema("sys_84", "SIGEO-Diárias", "", "", "Só gestores", "processo"),
+      criarSistema("sys_85", "Meu Portal", "Portal da intranet customizado para facilitar o acesso dos servidores a dados do relacionamento funcional.", "", "Só gestores", "processo"),
+      criarSistema("sys_86", "Geraldo", "Gera documentos dinamicamente a partir de modelos e parâmetros e consulta bases de dados para preenchê-los.", "", "Só gestores", "processo"),
+      criarSistema("sys_87", "SISPAE", "Facilita requerimentos com interface para criação de tipos específicos de PROADs.", "", "Só gestores", "processo"),
+      criarSistema("sys_88", "Sistema de Planejamento das Contratações", "Facilita o planejamento e a gestão dos contratos do Tribunal.", "https://apps.trt13.jus.br/contratos", "Só gestores", "processo"),
+      criarSistema("sys_89", "Transparência", "", "", "Só gestores", "processo"),
+      criarSistema("sys_90", "Contas Públicas", "Permite cadastrar e organizar informações públicas sobre licitações e instrumentos de cooperação.", "https://apps.trt13.jus.br/contaspublicasng/", "Só gestores", "processo"),
+      criarSistema("sys_91", "Sistema de Informações", "Permite que servidores e magistrados declarem passivos.", "", "Só gestores", "processo"),
+      criarSistema("sys_92", "Sisof", "Permite que Oficiais de Justiça registrem dias de atuação externa para recebimento de auxílio combustível.", "", "Só gestores", "processo"),
+      criarSistema("sys_93", "SCMP", "Cadastro de usuário, mudança de setor e orientação para correção de acesso e permissões.", "", "Só gestores", "processo"),
+      criarSistema("sys_94", "App Inventário", "Aplicativo para levantamento de bens para o inventário anual.", "", "Só gestores", "processo"),
+      criarSistema("sys_95", "APP SCMP", "Aplicativo para conferência de bens dos setores.", "", "Só gestores", "processo"),
+      criarSistema("sys_96", "SAO ADM - Gerência de Usuário", "Encaminhar à Squad - Processo Adm apenas quando não for possível realizar a operação via SAP; há autoatendimento disponível.", "https://apps.trt13.jus.br/saoadm", "Só gestores", "processo"),
+      criarSistema("sys_97", "SAO ADM - Relatórios (Sistemas administrativos)", "Relatórios de sistemas administrativos locais ou nacionais, como PROAD, Sisaval, SCMP e Contas Públicas.", "https://apps.trt13.jus.br/saoadm", "Só gestores", "processo"),
+      criarSistema("sys_98", "Organograma", "Exibe o organograma do TRT-13.", "https://www.trt13.jus.br/organograma/", "Só gestores", "processo"),
+      criarSistema("sys_99", "Sistema de controle de usuários", "Sistema de controle de acesso de usuários a outros sistemas.", "", "Só gestores", "citic"),
+      criarSistema("sys_100", "Chat Corporativo", "", "", "Só gestores", "ia", "Emerson"),
+      criarSistema("sys_101", "Infra IA", "", "", "Só gestores", "ia", "Hildeberto"),
+      criarSistema("sys_102", "Outros", "", "", "Só gestores", "ia", "Marcos Lins, Jaqueline"),
+      criarSistema("sys_103", "EaD/AVA/Moodle", "", "", "Só gestores", "dauEjud"),
+      criarSistema("sys_104", "Ponto Eletrônico", "", "https://sistemas.trt13.jus.br/ponto/", "Só gestores", "dau"),
+      criarSistema("sys_105", "SAO ADM - Relatório de produtividade por servidor (teletrabalho)", "", "", "Só gestores", "dauProcesso"),
+      criarSistema("sys_106", "Google Workspace", "", "", "Só gestores", "dauCitic")
+    );
+
+    const sistemaPrejud = DADOS_PADRAO.find(item => item.id === "sys_10");
+    sistemaPrejud.sistema = "Prejud";
+    sistemaPrejud.descricao = "Sistema que cria comunicação direta entre a Justiça e o INSS, permitindo consultas sobre benefícios, perícias e contribuições previdenciárias e o envio de ordens judiciais.";
+
     document.addEventListener("DOMContentLoaded", function() {
       if (localStorage.getItem("flow_is_admin") === "true") {
         isAdmin = true;
@@ -239,353 +372,64 @@
     });
 
     function loadData() {
-      // Usamos a chave v2 para desconsiderar qualquer lista antiga do cache
-      const storedData = localStorage.getItem("flow_custom_dados_v2");
-      globalData = storedData ? JSON.parse(storedData) : DADOS_PADRAO;
-
-      if (!storedData) {
-        localStorage.setItem("flow_custom_dados_v2", JSON.stringify(DADOS_PADRAO));
+      const storedData = localStorage.getItem("flow_custom_dados_v2") || localStorage.getItem("flow_custom_dados");
+      let savedItems = [];
+      try {
+        const parsedData = storedData ? JSON.parse(storedData) : [];
+        savedItems = Array.isArray(parsedData) ? parsedData : [];
+      } catch (error) {
+        savedItems = [];
       }
 
-      const storedLogo = localStorage.getItem("flow_custom_logo");
-      if (storedLogo) displayLogo(storedLogo);
+      const savedById = new Map(savedItems.map(item => [item.id, item]));
+      globalData = DADOS_PADRAO.map(defaultItem => {
+        const savedItem = savedById.get(defaultItem.id);
+        if (!savedItem) return defaultItem;
 
-      renderCards(globalData);
-    }
+        const mergedItem = { ...defaultItem, ...savedItem };
+        ["descricao", "url", "acesso", "responsavel", "obs"].forEach(field => {
+          if (!String(mergedItem[field] || "").trim() && defaultItem[field]) {
+            mergedItem[field] = defaultItem[field];
+          }
+        });
 
-    function saveData() {
-      localStorage.setItem("flow_custom_dados_v2", JSON.stringify(globalData));
-    }
-
-    function renderCards(data) {
-      document.getElementById('loading').style.display = 'none';
-      const container = document.getElementById('cardsContainer');
-      container.style.display = 'grid'; container.innerHTML = '';
-
-      data.forEach(item => {
-        let fluxoSearch = ''; let fluxoHtml = '';
-        if (item.fluxo && item.fluxo.length > 0) {
-          fluxoHtml += '<div class="flow-container"><div class="flow-title">FLUXO DE ESCALONAMENTO</div>';
-          item.fluxo.forEach(step => {
-            fluxoSearch += ` ${step.nivel || ''} ${step.fila || ''} ${step.resp || ''}`;
-            const isLevel1 = step.nivel === '1º Nível';
-            fluxoHtml += `
-              <div class="flow-step ${isLevel1 ? 'level-1' : ''}">
-                <span class="step-level">${escapeHtml(step.nivel)}</span>: 
-                <span class="step-queue">${escapeHtml(step.fila)}</span>
-                ${step.resp && step.resp !== 'Atendimento Inicial' ? `<div class="step-resp"><strong>Responsáveis:</strong> ${escapeHtml(step.resp)}</div>` : ''}
-              </div>`;
-          });
-          fluxoHtml += '</div>';
+        if (defaultItem.id === "sys_10" && savedItem.sistema === "Prevjud") {
+          mergedItem.sistema = defaultItem.sistema;
         }
 
-        const searchText = `${item.sistema} ${item.descricao} ${item.acesso} ${item.obs} ${fluxoSearch}`.toLowerCase();
-        const cardHtml = `
-          <div class="card card-item" data-search="${escapeHtml(searchText)}">
-            <div class="card-actions" style="display: ${isAdmin ? 'flex' : 'none'};">
-              <button class="btn-card btn-edit" onclick="openEditModal('${item.id}')">Editar</button>
-              <button class="btn-card btn-delete" onclick="deleteItem('${item.id}')">Excluir</button>
-            </div>
-            <div>
-              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div class="card-title">${escapeHtml(item.sistema)}</div>
-                ${item.acesso ? `<span class="badge-access">${escapeHtml(item.acesso)}</span>` : ''}
-              </div>
-              ${item.descricao ? `<div class="card-desc">${escapeHtml(item.descricao)}</div>` : ''}
-              ${item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" class="btn-link">Acessar Sistema &#8599;</a>` : ''}
-            </div>
-            <div>
-              ${fluxoHtml}
-              ${item.obs ? `<div class="obs-box"><strong>Obs:</strong> ${escapeHtml(item.obs)}</div>` : ''}
-            </div>
-          </div>`;
-        container.innerHTML += cardHtml;
+        const legacyFlow = fluxoPadraoLegado(defaultItem.id);
+        if (!Array.isArray(savedItem.fluxo) || savedItem.fluxo.length === 0 ||
+            (legacyFlow && JSON.stringify(savedItem.fluxo) === JSON.stringify(legacyFlow))) {
+          mergedItem.fluxo = defaultItem.fluxo;
+        }
+        return mergedItem;
       });
-    }
 
-    function handleLogoUpload(event) {
-      const file = event.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const base64 = e.target.result;
-        displayLogo(base64);
-        localStorage.setItem("flow_custom_logo", base64);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function displayLogo(src) {
-      const img = document.getElementById('logoImg'); const text = document.getElementById('logoText');
-      if (src) { img.src = src; img.style.display = 'block'; text.style.display = 'none'; }
-    }
-
-    function toggleLogin() {
-      if (isAdmin) {
-        isAdmin = false;
-        localStorage.setItem("flow_is_admin", "false");
-        updateAdminUI();
-      } else {
-        document.getElementById('loginModal').style.display = 'flex';
-      }
-    }
-
-    function submitLogin() {
-      const u
-
-cat << 'EOF' > Index.html
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FLOW - Escalonamento de Filas SETIC</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #e2e8f0; color: #2d3748; }
-
-    .header {
-      background: linear-gradient(145deg, #0d253f, #1a4a7a);
-      color: #ffffff;
-      padding: 35px 20px 45px 20px;
-      text-align: center;
-      position: relative;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-    }
-    
-    .logo-container {
-      position: absolute; top: 15px; left: 20px;
-      display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(145deg, #0a1e33, #113254);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px; padding: 6px 14px; max-width: 220px; min-height: 55px;
-    }
-    .logo-container img { max-height: 48px; max-width: 100%; object-fit: contain; }
-    .logo-placeholder-text { font-size: 0.72rem; font-weight: 700; color: #cbd5e1; text-transform: uppercase; }
-
-    .top-right-nav {
-      position: absolute; top: 15px; right: 20px;
-      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    }
-
-    .btn-base, .btn-admin, .btn-add, .btn-change-logo, .btn-change-pass {
-      padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;
-      cursor: pointer; text-decoration: none; border: none; transition: all 0.15s;
-    }
-
-    .btn-base-publica { background: linear-gradient(145deg, #f04898, #d62d7a); color: white; }
-    .btn-base-privada { background: linear-gradient(145deg, #00d2ff, #0099cc); color: white; }
-    .btn-admin { background: linear-gradient(145deg, #3a506b, #1c2d42); color: white; }
-    .btn-add { background: linear-gradient(145deg, #2ecc71, #27ae60); color: white; display: none; }
-    .btn-change-logo { background: linear-gradient(145deg, #ffaa00, #e67e22); color: white; display: none; }
-    .btn-change-pass { background: linear-gradient(145deg, #8e44ad, #6c3483); color: white; display: none; }
-
-    .header h1 { font-size: 2.2rem; margin-top: 10px; margin-bottom: 6px; letter-spacing: 1px; }
-    .header p { font-size: 0.95rem; opacity: 0.9; margin-bottom: 25px; }
-
-    .search-box { max-width: 650px; margin: 0 auto; }
-    .search-input {
-      width: 100%; padding: 15px 25px; font-size: 1rem; border: none;
-      border-radius: 30px; outline: none; background: #ffffff;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    }
-
-    .container { max-width: 1250px; margin: 35px auto; padding: 0 20px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 25px; }
-    .card {
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-      border-radius: 14px; padding: 22px; box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-      display: flex; flex-direction: column; justify-content: space-between;
-      border-top: 5px solid #1a4a7a; position: relative; transition: all 0.3s;
-    }
-    .card:hover { transform: translateY(-8px); box-shadow: 0 18px 30px rgba(0,0,0,0.15); }
-
-    .card-actions { display: none; position: absolute; top: 12px; right: 12px; gap: 6px; }
-    .btn-card { border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer; color: white; }
-    .btn-edit { background: linear-gradient(145deg, #f1c40f, #f39c12); color: #111; }
-    .btn-delete { background: linear-gradient(145deg, #e74c3c, #c0392b); }
-
-    .card-title { font-size: 1.2rem; font-weight: 800; color: #0d253f; }
-    .badge-access { background: #e2e8f0; color: #1e293b; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 12px; }
-    .card-desc { font-size: 0.875rem; color: #475569; margin: 10px 0 14px 0; }
-    .btn-link {
-      display: inline-block; text-align: center; background: linear-gradient(145deg, #1a4a7a, #0d253f);
-      color: white; text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; margin-bottom: 14px;
-    }
-
-    .flow-container { border-top: 2px dashed #cbd5e1; padding-top: 14px; margin-top: 12px; }
-    .flow-title { font-size: 0.72rem; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 12px; }
-    .flow-step { background: #ffffff; border-left: 4px solid #1a4a7a; padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; font-size: 0.825rem; }
-    .flow-step.level-1 { border-left-color: #64748b; background: #f1f5f9; }
-    .step-level { font-weight: 800; color: #1a4a7a; }
-    .step-queue { font-weight: 700; color: #0f172a; }
-    .step-resp { color: #475569; margin-top: 4px; font-size: 0.8rem; }
-
-    .obs-box { margin-top: 12px; background: #fff9c4; border: 1px solid #ffe082; padding: 10px; border-radius: 8px; font-size: 0.775rem; color: #7f6000; }
-    .status-msg { text-align: center; padding: 40px; font-size: 1.1rem; color: #64748b; font-weight: 600; }
-
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000;
-    }
-    .modal { background: #ffffff; padding: 28px; border-radius: 16px; width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; }
-    .modal h3 { margin-bottom: 18px; color: #0d253f; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; }
-
-    .fluxo-section { border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; background: #f8fafc; margin-top: 18px; }
-    .fluxo-section-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
-    .btn-add-fluxo { background: #0072ff; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; }
-    .fluxo-row { display: flex; gap: 8px; margin-bottom: 10px; }
-    .fluxo-row input { padding: 8px; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 6px; }
-    .fluxo-col-nivel { flex: 1.2; } .fluxo-col-fila { flex: 2; } .fluxo-col-resp { flex: 2.5; }
-    .btn-remove-fluxo { background: #ff4b2b; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-
-    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 22px; }
-    .btn-sec { background: #64748b; color: white; border: none; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; }
-    .btn-pri { background: #0d253f; color: white; border: none; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; }
-  </style>
-</head>
-<body>
-
-  <div class="header">
-    <div class="logo-container" id="logoContainer">
-      <img id="logoImg" src="" alt="Logo TRT13" style="display: none;">
-      <span id="logoText" class="logo-placeholder-text">FLOW — TRT13</span>
-    </div>
-
-    <div class="top-right-nav">
-      <a href="https://conhecimento-setic.trt13.jus.br/" target="_blank" class="btn-base btn-base-publica">BASE PÚBLICA</a>
-      <a href="https://conhecimento-dau.trt13.jus.br/" target="_blank" class="btn-base btn-base-privada">BASE PRIVADA</a>
-      
-      <input type="file" id="logoFileInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
-      <button id="btnChangeLogo" class="btn-change-logo" onclick="document.getElementById('logoFileInput').click()">Alterar Logo</button>
-      <button id="btnChangePass" class="btn-change-pass" onclick="openChangePassModal()">Alterar Senha</button>
-
-      <button id="btnAdd" class="btn-add" onclick="openEditModal()">+ Novo Sistema</button>
-      <button id="btnLogin" class="btn-admin" onclick="toggleLogin()">Entrar</button>
-    </div>
-
-    <h1>FLOW</h1>
-    <p>Escalonamento de Filas SETIC TRT-13 — Hierarquia de Atendimento e Responsáveis</p>
-    
-    <div class="search-box">
-      <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar por sistema, módulo, fila ou responsável..." onkeyup="filterCards()">
-    </div>
-  </div>
-
-  <div class="container">
-    <div id="loading" class="status-msg">Carregando dados do FLOW...</div>
-    <div id="cardsContainer" class="grid" style="display:none;"></div>
-    <div id="noResults" class="status-msg" style="display:none;">Nenhum registro encontrado para o termo pesquisado.</div>
-  </div>
-
-  <!-- Modais -->
-  <div id="loginModal" class="modal-overlay">
-    <div class="modal" style="max-width: 400px;">
-      <h3>Acesso Administrativo</h3>
-      <div class="form-group"><label>Usuário</label><input type="text" id="loginUser"></div>
-      <div class="form-group"><label>Senha</label><input type="password" id="loginPass"></div>
-      <div id="loginError" style="color:red; font-size:0.8rem; display:none; margin-bottom:10px;">Credenciais inválidas.</div>
-      <div class="modal-actions">
-        <button class="btn-sec" onclick="closeLoginModal()">Cancelar</button>
-        <button class="btn-pri" onclick="submitLogin()">Entrar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="changePassModal" class="modal-overlay">
-    <div class="modal" style="max-width: 400px;">
-      <h3>Alterar Senha de Admin</h3>
-      <div class="form-group"><label>Senha Atual</label><input type="password" id="passAtual"></div>
-      <div class="form-group"><label>Nova Senha</label><input type="password" id="passNova"></div>
-      <div class="modal-actions">
-        <button class="btn-sec" onclick="closeChangePassModal()">Cancelar</button>
-        <button class="btn-pri" onclick="submitChangePass()">Salvar Nova Senha</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="editModal" class="modal-overlay">
-    <div class="modal">
-      <h3 id="modalTitle">Editar Sistema</h3>
-      <input type="hidden" id="editId">
-      <div class="form-group"><label>Nome do Sistema / Módulo</label><input type="text" id="editNome"></div>
-      <div class="form-group"><label>Acesso</label><input type="text" id="editAcesso"></div>
-      <div class="form-group"><label>Descrição</label><textarea id="editDesc" rows="2"></textarea></div>
-      <div class="form-group"><label>URL / Link</label><input type="text" id="editUrl"></div>
-      <div class="form-group"><label>Observação</label><input type="text" id="editObs"></div>
-
-      <div class="fluxo-section">
-        <div class="fluxo-section-header">
-          <label>Níveis de Escalonamento</label>
-          <button type="button" class="btn-add-fluxo" onclick="addFluxoRow()">+ Adicionar Nível</button>
-        </div>
-        <div id="fluxoRowsContainer"></div>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn-sec" onclick="closeEditModal()">Cancelar</button>
-        <button class="btn-pri" onclick="saveItem()">Salvar</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let globalData = [];
-    let isAdmin = false;
-
-    const DADOS_PADRAO = [
-      // Bloco 1 - Sistemas PJe Padrão
-      { id: "sys_1", sistema: "Aud", descricao: "Sistema de audiências da Justiça do Trabalho (Sistema Satélite do PJe)", url: "https://pje.trt13.jus.br/aud/", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_2", sistema: "Audiência Digital", descricao: "Sistema para envio das mídias de audiências para o PJe Mídias", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_3", sistema: "Ccalc", descricao: "Sistema para distribuição dos cálculos dos processos para os calculistas.", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_4", sistema: "Central de Mandados", descricao: "Módulo do PJe para distribuição dos mandados.", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_5", sistema: "eCartas", descricao: "Integração do PJe com os correios.", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_6", sistema: "GPrec", descricao: "Sistema de Gestão de Precatórios e RPV (Sistema Satélite do PJe)", url: "https://pje.trt13.jus.br/gprec/", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_7", sistema: "JTe", descricao: "App para acompanhamento do trâmite processual no PJe", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_8", sistema: "PJe 1º Grau", descricao: "Sistema de Processos Judiciais Eletrônicos da JT", url: "https://pje.trt13.jus.br/primeirograu/", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_9", sistema: "PJe-Calc", descricao: "Módulo do PJe que realiza os cálculos dos processos.", url: "https://pje.trt13.jus.br/pjecalc/", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_10", sistema: "Prevjud", descricao: "Comunicação direta entre a Justiça e o INSS", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_11", sistema: "Renajud", descricao: "Restrição judicial de veículos (CNJ/Denatran)", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_12", sistema: "SiscondJ", descricao: "Integração do PJe com o Banco do Brasil (boletos e alvarás)", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_13", sistema: "Sisdov", descricao: "Designação de oitivas por videoconferência", url: "https://sisdov.trt13.jus.br/", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_14", sistema: "Sisbajud", descricao: "Integração da Justiça com o Banco Central", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_15", sistema: "Sniper", descricao: "Investigação patrimonial para servidores e magistrados", url: "", acesso: "Só magistrado", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_16", sistema: "PJe Mídias", descricao: "Armazena vídeos de audiências e sessões", url: "https://midias.pje.jus.br/midias/web/site/login", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-
-      // Bloco 2 - PJe 2º Grau & NUGEP
-      { id: "sys_17", sistema: "PJe 2º Grau", descricao: "Sistema de Processos Judiciais Eletrônicos da JT - Segunda Instância", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Hugo Nóbrega, Bruno Coutinho, Lucas Anderson" }] },
-      { id: "sys_18", sistema: "NUGEP", descricao: "Controle de processos sobrestados aguardando julgamento", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Hugo Nóbrega, Bruno Coutinho, Lucas Anderson" }] },
-      { id: "sys_19", sistema: "Consulta Processual Unificada", descricao: "Plataforma integrada de consulta de processos", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Hugo Nóbrega, Bruno Coutinho, Lucas Anderson" }] },
-
-      // Bloco 3 - SEGEPE e Gestão de Pessoas
-      { id: "sys_20", sistema: "SIGEP", descricao: "Sistema Integrado de Gestão de Pessoas", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Squad - SEGEPE e Folha", resp: "Lucas Farias, Wagner Porto, Jorge Flávio" }] },
-      { id: "sys_21", sistema: "Folha Web", descricao: "Gestão e consulta da folha de pagamento dos servidores", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Squad - SEGEPE e Folha", resp: "Lucas Farias, Wagner Porto, Jorge Flávio" }] },
-      { id: "sys_22", sistema: "Sisaval", descricao: "Avaliação de desempenho dos servidores do tribunal", url: "https://apps.trt13.jus.br/sisavalng", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Squad - SEGEPE e Folha", resp: "Lucas Farias, Wagner Porto, Jorge Flávio" }] }
-    ];
-
-    document.addEventListener("DOMContentLoaded", function() {
-      if (localStorage.getItem("flow_is_admin") === "true") {
-        isAdmin = true;
-        updateAdminUI();
-      }
-      loadData();
-    });
-
-    function loadData() {
-      // Usamos a chave v2 para desconsiderar qualquer lista antiga do cache
-      const storedData = localStorage.getItem("flow_custom_dados_v2");
-      globalData = storedData ? JSON.parse(storedData) : DADOS_PADRAO;
-
-      if (!storedData) {
-        localStorage.setItem("flow_custom_dados_v2", JSON.stringify(DADOS_PADRAO));
-      }
+      const knownIds = new Set(DADOS_PADRAO.map(item => item.id));
+      globalData.push(...savedItems.filter(item => !knownIds.has(item.id)));
+      localStorage.setItem("flow_custom_dados_v2", JSON.stringify(globalData));
 
       const storedLogo = localStorage.getItem("flow_custom_logo");
       if (storedLogo) displayLogo(storedLogo);
 
       renderCards(globalData);
+    }
+
+    function fluxoPadraoLegado(id) {
+      const numero = Number(id.replace("sys_", ""));
+      const fluxo = [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }];
+      if (numero <= 16) {
+        fluxo.push({ nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" });
+        fluxo.push({ nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" });
+      } else if (numero <= 19) {
+        fluxo.push({ nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" });
+        fluxo.push({ nivel: "3º Nível", fila: "Squad - PJe", resp: "Hugo Nóbrega, Bruno Coutinho, Lucas Anderson" });
+      } else if (numero <= 22) {
+        fluxo.push({ nivel: "2º Nível", fila: "Squad - SEGEPE e Folha", resp: "Lucas Farias, Wagner Porto, Jorge Flávio" });
+      } else {
+        return null;
+      }
+      return fluxo;
     }
 
     function saveData() {
@@ -606,7 +450,7 @@ cat << 'EOF' > Index.html
             const isLevel1 = step.nivel === '1º Nível';
             fluxoHtml += `
               <div class="flow-step ${isLevel1 ? 'level-1' : ''}">
-                <span class="step-level">${escapeHtml(step.nivel)}</span>: 
+                <span class="step-level">${escapeHtml(step.nivel)}</span>:
                 <span class="step-queue">${escapeHtml(step.fila)}</span>
                 ${step.resp && step.resp !== 'Atendimento Inicial' ? `<div class="step-resp"><strong>Responsáveis:</strong> ${escapeHtml(step.resp)}</div>` : ''}
               </div>`;
@@ -614,7 +458,7 @@ cat << 'EOF' > Index.html
           fluxoHtml += '</div>';
         }
 
-        const searchText = `${item.sistema} ${item.descricao} ${item.acesso} ${item.obs} ${fluxoSearch}`.toLowerCase();
+        const searchText = `${item.sistema} ${item.descricao} ${item.acesso} ${item.responsavel} ${item.obs} ${fluxoSearch}`.toLowerCase();
         const cardHtml = `
           <div class="card card-item" data-search="${escapeHtml(searchText)}">
             <div class="card-actions" style="display: ${isAdmin ? 'flex' : 'none'};">
@@ -628,6 +472,7 @@ cat << 'EOF' > Index.html
               </div>
               ${item.descricao ? `<div class="card-desc">${escapeHtml(item.descricao)}</div>` : ''}
               ${item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" class="btn-link">Acessar Sistema &#8599;</a>` : ''}
+              ${item.responsavel ? `<div class="card-desc"><strong>Responsável:</strong> ${escapeHtml(item.responsavel)}</div>` : ''}
             </div>
             <div>
               ${fluxoHtml}
@@ -722,7 +567,8 @@ cat << 'EOF' > Index.html
         document.getElementById('modalTitle').innerText = 'Novo Sistema';
         document.getElementById('editId').value = ''; document.getElementById('editNome').value = '';
         document.getElementById('editAcesso').value = ''; document.getElementById('editDesc').value = '';
-        document.getElementById('editUrl').value = ''; document.getElementById('editObs').value = '';
+        document.getElementById('editUrl').value = ''; document.getElementById('editResponsavel').value = '';
+        document.getElementById('editObs').value = '';
         addFluxoRow('1º Nível', 'Fila Central de Serviço', 'Atendimento Inicial');
         addFluxoRow('2º Nível', '', '');
       } else {
@@ -733,6 +579,7 @@ cat << 'EOF' > Index.html
         document.getElementById('editAcesso').value = item.acesso || '';
         document.getElementById('editDesc').value = item.descricao || '';
         document.getElementById('editUrl').value = item.url || '';
+        document.getElementById('editResponsavel').value = item.responsavel || '';
         document.getElementById('editObs').value = item.obs || '';
         if (item.fluxo && item.fluxo.length > 0) {
           item.fluxo.forEach(f => addFluxoRow(f.nivel || '', f.fila || '', f.resp || ''));
@@ -762,6 +609,7 @@ cat << 'EOF' > Index.html
           item.sistema = nome; item.acesso = document.getElementById('editAcesso').value;
           item.descricao = document.getElementById('editDesc').value;
           item.url = document.getElementById('editUrl').value;
+          item.responsavel = document.getElementById('editResponsavel').value;
           item.obs = document.getElementById('editObs').value;
           item.fluxo = fluxos;
         }
@@ -771,6 +619,7 @@ cat << 'EOF' > Index.html
           acesso: document.getElementById('editAcesso').value,
           descricao: document.getElementById('editDesc').value,
           url: document.getElementById('editUrl').value,
+          responsavel: document.getElementById('editResponsavel').value,
           obs: document.getElementById('editObs').value,
           fluxo: fluxos
         });
