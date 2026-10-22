@@ -109,6 +109,69 @@
     .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 22px; }
     .btn-sec { background: #64748b; color: white; border: none; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; }
     .btn-pri { background: #0d253f; color: white; border: none; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+
+    :root {
+      --ink: #173a36;
+      --deep: #102f2c;
+      --teal: #167c75;
+      --mint: #d8f0e7;
+      --lime: #c1e86b;
+      --coral: #f18469;
+      --paper: #f2f6f4;
+      --line: #d7e4df;
+    }
+    body { font-family: "Trebuchet MS", "Segoe UI", sans-serif; color: var(--ink); background: radial-gradient(ellipse at 12% 12%, rgba(193,232,107,.23), transparent 32%), radial-gradient(ellipse at 88% 38%, rgba(22,124,117,.12), transparent 34%), var(--paper); }
+    .header { padding: 88px 20px 38px; background: linear-gradient(135deg, #102f2c 0%, #155e59 58%, #167c75 100%); box-shadow: 0 16px 42px rgba(16,47,44,.24); }
+    .header h1 { color: #fff; }
+    .logo-container { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.28); box-shadow: inset 0 1px rgba(255,255,255,.18); }
+    .btn-base-publica { background: var(--coral); }
+    .btn-base-privada { background: var(--lime); color: var(--deep); }
+    .btn-admin { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); }
+    .btn-add { background: var(--lime); color: var(--deep); }
+    .btn-change-logo { background: var(--coral); }
+    .btn-change-pass { background: #e7f2ee; color: var(--deep); }
+    .btn-backup { display: none; background: #e7f2ee; color: var(--deep); }
+    .search-input { border-radius: 12px; box-shadow: 0 12px 28px rgba(8,40,36,.22); }
+    .container { margin-top: 30px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 22px; perspective: 1400px; }
+    .card { border: 1px solid rgba(23,58,54,.09); border-top: 4px solid var(--teal); border-radius: 8px; background: linear-gradient(145deg, #fff 0%, #f7fbf9 72%, #edf6f2 100%); box-shadow: 0 10px 24px rgba(16,47,44,.1), 0 2px 5px rgba(16,47,44,.05); transform: perspective(1100px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)); transform-style: preserve-3d; transition: transform .18s ease-out, box-shadow .25s ease, border-color .25s ease; }
+    .card:hover { transform: perspective(1100px) translateY(-5px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)); border-color: rgba(22,124,117,.34); box-shadow: 0 22px 36px rgba(16,47,44,.17), 0 5px 12px rgba(16,47,44,.08); }
+    .card > div, .card-title, .badge-access, .flow-step { transform: translateZ(12px); }
+    .card-title, .step-level { color: var(--deep); }
+    .badge-access { background: var(--mint); color: var(--deep); border-radius: 4px; }
+    .btn-link { background: var(--teal); border-radius: 5px; }
+    .flow-container { border-top-color: var(--line); }
+    .flow-step { border-left-color: var(--teal); background: #fff; }
+    .flow-step.level-1 { border-left-color: var(--coral); background: #fff4ef; }
+    .obs-box { background: #fff3df; border-color: #f3d293; color: #76500c; }
+    .modal { border-radius: 8px; box-shadow: 0 26px 70px rgba(7,35,32,.28); }
+    .modal h3 { color: var(--deep); }
+    .form-group input:focus, .form-group textarea:focus, .fluxo-row input:focus { outline: 3px solid rgba(22,124,117,.18); border-color: var(--teal); }
+    .btn-pri, .btn-add-fluxo { background: var(--teal); }
+    .btn-sec { background: #71847e; }
+    button, a { transition: transform .18s ease, filter .18s ease, box-shadow .18s ease; }
+    button:hover, a:hover { filter: brightness(1.06); }
+    button:active, a:active { transform: translateY(1px); }
+    @media (hover: none), (pointer: coarse) {
+      .card, .card:hover { transform: none; }
+      .card > div, .card-title, .badge-access, .flow-step { transform: none; }
+    }
+    @media (max-width: 760px) {
+      .header { padding: 150px 16px 28px; }
+      .logo-container { top: 14px; left: 14px; }
+      .top-right-nav { top: 82px; left: 14px; right: 14px; justify-content: center; gap: 7px; }
+      .btn-base, .btn-admin, .btn-add, .btn-change-logo, .btn-change-pass { padding: 8px 10px; font-size: .72rem; }
+      .header h1 { font-size: 2rem; }
+      .header p { line-height: 1.5; }
+      .container { margin: 22px auto; padding: 0 14px; }
+      .grid { gap: 14px; }
+      .card { padding: 18px; }
+      .fluxo-row { flex-wrap: wrap; }
+      .fluxo-col-nivel, .fluxo-col-fila, .fluxo-col-resp { flex: 1 1 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -128,6 +191,9 @@
       <button id="btnChangePass" class="btn-change-pass" onclick="openChangePassModal()">Alterar Senha</button>
 
       <button id="btnAdd" class="btn-add" onclick="openEditModal()">+ Novo Sistema</button>
+      <button id="btnExportBackup" class="btn-backup" onclick="exportDataBackup()">Exportar backup</button>
+      <button id="btnImportBackup" class="btn-backup" onclick="document.getElementById('dataImportInput').click()">Importar backup</button>
+      <input type="file" id="dataImportInput" accept="application/json,.json" style="display:none" onchange="importDataBackup(event)">
       <button id="btnLogin" class="btn-admin" onclick="toggleLogin()">Entrar</button>
     </div>
 
@@ -218,7 +284,7 @@
       { id: "sys_13", sistema: "Sisdov", descricao: "Designação de oitivas por videoconferência", url: "https://sisdov.trt13.jus.br/", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
       { id: "sys_14", sistema: "Sisbajud", descricao: "Integração da Justiça com o Banco Central", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
       { id: "sys_15", sistema: "Sniper", descricao: "Investigação patrimonial para servidores e magistrados", url: "", acesso: "Só magistrado", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
-      { id: "sys_16", sistema: "PJe Mídias", descricao: "Armazena vídeos de audiências e sessões", url: "https://midias.pje.jus.br/midias/web/site/login", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
+      { id: "sys_16", sistema: "PJe Mídias", descricao: "Sistema que armazena vídeos de audiências e sessões. Para enviar vídeos, utilize o Audiência Digital.", url: "https://midias.pje.jus.br/midias/web/site/login", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Felipe Barbosa, Washington, Frederico Pereira" }] },
 
       // Bloco 2 - PJe 2º Grau & NUGEP
       { id: "sys_17", sistema: "PJe 2º Grau", descricao: "Sistema de Processos Judiciais Eletrônicos da JT - Segunda Instância", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Hugo Nóbrega, Bruno Coutinho, Lucas Anderson" }] },
@@ -226,10 +292,9 @@
       { id: "sys_19", sistema: "Consulta Processual Unificada", descricao: "Plataforma integrada de consulta de processos", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Fila PJe 2º Nível", resp: "Emília, Iuri, Marcos Everton" }, { nivel: "3º Nível", fila: "Squad - PJe", resp: "Hugo Nóbrega, Bruno Coutinho, Lucas Anderson" }] },
 
       // Bloco 3 - SEGEPE e Gestão de Pessoas
-      { id: "sys_20", sistema: "SIGEP", descricao: "Sistema Integrado de Gestão de Pessoas", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Squad - SEGEPE e Folha", resp: "Lucas Farias, Wagner Porto, Jorge Flávio" }] },
-      { id: "sys_21", sistema: "Folha Web", descricao: "Gestão e consulta da folha de pagamento dos servidores", url: "", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Squad - SEGEPE e Folha", resp: "Lucas Farias, Wagner Porto, Jorge Flávio" }] },
-      { id: "sys_22", sistema: "Sisaval", descricao: "Avaliação de desempenho dos servidores do tribunal", url: "https://apps.trt13.jus.br/sisavalng", acesso: "Só gestores", obs: "", fluxo: [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }, { nivel: "2º Nível", fila: "Squad - SEGEPE e Folha", resp: "Lucas Farias, Wagner Porto, Jorge Flávio" }] }
     ];
+
+    const SISTEMAS_REMOVIDOS = new Set(["sys_20", "sys_21", "sys_22"]);
 
     const EQUIPES = {
       pje: ["PJE 2º Nível", "Squad - PJe"],
@@ -254,27 +319,9 @@
       return { id, sistema, descricao, url, acesso, responsavel, obs: "", fluxo };
     }
 
-    const RESPONSAVEIS_PADRAO = {
-      sys_1: "Felipe Barbosa",
-      sys_2: "Washington",
-      sys_3: "Frederico Pereira",
-      sys_17: "Hugo Nóbrega",
-      sys_20: "Lucas Farias",
-      sys_21: "Wagner Porto"
-    };
-    DADOS_PADRAO.forEach(item => {
-      item.responsavel = RESPONSAVEIS_PADRAO[item.id] || item.responsavel || "";
-      const numero = Number(item.id.replace("sys_", ""));
-      const equipe = numero <= 19 ? "pje" : "segepe";
-      const [fila2, fila3] = EQUIPES[equipe];
-      item.fluxo = [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }];
-      if (fila2) item.fluxo.push({ nivel: "2º Nível", fila: fila2, resp: "" });
-      if (fila3) item.fluxo.push({ nivel: "3º Nível", fila: fila3, resp: "" });
-    });
-
     DADOS_PADRAO.push(
       criarSistema("sys_23", "Migrador Avulso de processos da CCLE"),
-      criarSistema("sys_24", "PJe Gestão"),
+      criarSistema("sys_24", "PJe Gestão", "Extensão instalada e vinculada ao PJe."),
       criarSistema("sys_25", "SAO PJE 1º Grau - Relatórios", "Relatórios do SAO PJE referentes a questões do 1º grau."),
       criarSistema("sys_26", "SIF (Sistema de Interoperabilidade Financeira)", "Módulo de integração do PJe com a Caixa Econômica Federal para emissão de boletos (guias de depósito judicial) e expedição de alvarás."),
       criarSistema("sys_27", "PJe-RS"),
@@ -285,16 +332,16 @@
       criarSistema("sys_32", "SisAudio"),
       criarSistema("sys_33", "Sustentação Oral no Pleno"),
       criarSistema("sys_34", "SAO ADM - Sistema"),
-      criarSistema("sys_35", "SAO PJE - Sistema"),
+      criarSistema("sys_35", "SAO PJE - Sistema e Relatórios", "Sistema SAO PJe e relatórios referentes a questões do 1º e 2º grau."),
       criarSistema("sys_36", "PJe Admissibilidade"),
       criarSistema("sys_37", "Unificador de PDF"),
       criarSistema("sys_38", "SAO PJE 2º Grau - Relatórios"),
-      criarSistema("sys_39", "eRec"),
+      criarSistema("sys_39", "e-Rec"),
       criarSistema("sys_40", "Preá"),
       criarSistema("sys_41", "PACO"),
       criarSistema("sys_42", "Migração de RP do GPREC"),
       criarSistema("sys_43", "DataJud", "", "", "Só gestores", "corregedoria", "Denis"),
-      criarSistema("sys_44", "HorusJud", "", "", "Só gestores", "corregedoria", "Andrei"),
+      criarSistema("sys_44", "HorusJu", "", "", "Só gestores", "corregedoria", "Andrei"),
       criarSistema("sys_45", "GEC - Ata de Correição Automática", "Sistema de Geração de Atas de Correição.", "", "Só gestores", "corregedoria", "Wagner Régis"),
       criarSistema("sys_46", "Extrator eGestão", "", "", "Só gestores", "corregedoria"),
       criarSistema("sys_47", "Garimpo", "", "", "Só gestores", "corregedoria"),
@@ -353,11 +400,111 @@
       criarSistema("sys_100", "Chat Corporativo", "", "", "Só gestores", "ia", "Emerson"),
       criarSistema("sys_101", "Infra IA", "", "", "Só gestores", "ia", "Hildeberto"),
       criarSistema("sys_102", "Outros", "", "", "Só gestores", "ia", "Marcos Lins, Jaqueline"),
-      criarSistema("sys_103", "EaD/AVA/Moodle", "", "", "Só gestores", "dauEjud"),
-      criarSistema("sys_104", "Ponto Eletrônico", "", "https://sistemas.trt13.jus.br/ponto/", "Só gestores", "dau"),
-      criarSistema("sys_105", "SAO ADM - Relatório de produtividade por servidor (teletrabalho)", "", "", "Só gestores", "dauProcesso"),
-      criarSistema("sys_106", "Google Workspace", "", "", "Só gestores", "dauCitic")
+      criarSistema("sys_103", "EaD/AVA/Moodle", "Ambiente Virtual de Aprendizagem.", "", "Só gestores", "dauEjud"),
+      criarSistema("sys_104", "Ponto Eletrônico", "Sistema de controle de ponto eletrônico.", "https://sistemas.trt13.jus.br/ponto/", "Só gestores", "dau"),
+      criarSistema("sys_105", "SAO ADM - Relatório de produtividade por servidor (teletrabalho)", "Relatórios de acompanhamento da produtividade de servidores em teletrabalho.", "", "Só gestores", "dauProcesso"),
+      criarSistema("sys_106", "Google Workspace", "Ferramentas do Google (Gmail, Drive, etc.)", "", "Só gestores", "dauCitic")
     );
+
+    const RESPONSAVEIS_PADRAO = {
+      sys_1: "Felipe Barbosa",
+      sys_2: "Washington",
+      sys_3: "Frederico Pereira",
+      sys_17: "Hugo Nóbrega",
+      sys_30: "Bruno Coutinho",
+      sys_31: "Lucas Anderson",
+      sys_43: "Denis",
+      sys_44: "Andrei",
+      sys_45: "Wagner Régis",
+      sys_53: "Jorge Flávio",
+      sys_69: "Miguel",
+      sys_70: "José Rafael",
+      sys_71: "Thiago Lins",
+      sys_72: "Caio Caroca",
+      sys_73: "Sebastião",
+      sys_74: "Gleydson",
+      sys_75: "Juliana",
+      sys_100: "Emerson",
+      sys_101: "Hildeberto",
+      sys_102: "Marcos Lins, Jaqueline"
+    };
+    const RESPONSAVEIS_PJE_NIVEL_2 = "Emília, Iuri, Marcos Everton";
+    const RESPONSAVEIS_PJE_NIVEL_3 = "Felipe Barbosa, Washington, Frederico Pereira";
+    const RESPONSAVEIS_PJE_2_GRAU = "Hugo Nóbrega, Bruno Coutinho, Lucas Anderson";
+    const RESPONSAVEIS_CORREGEDORIA = "Denis, Andrei, Wagner Régis";
+    const RESPONSAVEIS_SEGEPE = "Lucas Farias, Wagner Porto, Jorge Flávio";
+    const RESPONSAVEIS_PORTAIS = "Miguel, José Rafael, Thiago Lins";
+    const RESPONSAVEIS_PROCESSO = "Caio Caroca, Sebastião, Gleydson, Juliana";
+    const RESPONSAVEIS_NIA = "Emerson, Hildeberto, Marcos Lins, Jaqueline";
+    const RESPONSAVEIS_DAU = "Avaliador DAU (Repassa para Sílvio/EJUD se necessário)";
+    const RESPONSAVEIS_PJE_NIVEL_3_POR_ID = {
+      sys_23: RESPONSAVEIS_PJE_NIVEL_3,
+      sys_24: RESPONSAVEIS_PJE_NIVEL_3,
+      sys_25: "Felipe Barbosa, Hugo Nóbrega",
+      sys_26: RESPONSAVEIS_PJE_NIVEL_3,
+      sys_27: RESPONSAVEIS_PJE_NIVEL_3,
+      sys_28: RESPONSAVEIS_PJE_NIVEL_3,
+      sys_29: RESPONSAVEIS_PJE_NIVEL_3,
+      sys_30: RESPONSAVEIS_PJE_2_GRAU,
+      sys_31: RESPONSAVEIS_PJE_2_GRAU,
+      sys_32: RESPONSAVEIS_PJE_2_GRAU,
+      sys_33: RESPONSAVEIS_PJE_2_GRAU,
+      sys_34: RESPONSAVEIS_PJE_2_GRAU,
+      sys_35: "Felipe Barbosa, Hugo Nóbrega",
+      sys_36: RESPONSAVEIS_PJE_2_GRAU,
+      sys_37: RESPONSAVEIS_PJE_2_GRAU,
+      sys_38: RESPONSAVEIS_PJE_2_GRAU,
+      sys_39: RESPONSAVEIS_PJE_2_GRAU,
+      sys_40: RESPONSAVEIS_PJE_2_GRAU,
+      sys_41: RESPONSAVEIS_PJE_2_GRAU,
+      sys_42: RESPONSAVEIS_PJE_2_GRAU
+    };
+
+    function criarFluxoPadrao(fila2, responsaveis2 = "", fila3 = "", responsaveis3 = "") {
+      const fluxo = [{ nivel: "1º Nível", fila: "Fila Central de Serviço", resp: "Atendimento Inicial" }];
+      if (fila2) fluxo.push({ nivel: "2º Nível", fila: fila2, resp: responsaveis2 });
+      if (fila3) fluxo.push({ nivel: "3º Nível", fila: fila3, resp: responsaveis3 });
+      return fluxo;
+    }
+
+    function atualizarDadosPadrao(item) {
+      const numero = Number(item.id.replace("sys_", ""));
+      item.responsavel = RESPONSAVEIS_PADRAO[item.id] || item.responsavel || "";
+
+      if (numero <= 16) {
+        item.fluxo = criarFluxoPadrao("PJE 2º Nível", RESPONSAVEIS_PJE_NIVEL_2, "Squad - PJe", RESPONSAVEIS_PJE_NIVEL_3);
+      } else if (numero <= 19) {
+        item.fluxo = criarFluxoPadrao("PJE 2º Nível", RESPONSAVEIS_PJE_NIVEL_2, "Squad - PJe", RESPONSAVEIS_PJE_2_GRAU);
+      } else if (numero >= 23 && numero <= 42) {
+        item.fluxo = criarFluxoPadrao("PJE 2º Nível", RESPONSAVEIS_PJE_NIVEL_2, "Squad - PJe", RESPONSAVEIS_PJE_NIVEL_3_POR_ID[item.id] || RESPONSAVEIS_PJE_2_GRAU);
+      } else if (numero >= 43 && numero <= 52) {
+        const fila3 = numero === 44 ? "Squad - Pje - Negocial" : "Squad - Corregedoria e Estatísticas";
+        const responsaveis3 = numero === 44 ? "Externa" : RESPONSAVEIS_CORREGEDORIA;
+        item.fluxo = criarFluxoPadrao("PJE 2º Nível", RESPONSAVEIS_PJE_NIVEL_2, fila3, responsaveis3);
+      } else if (numero >= 53 && numero <= 68) {
+        item.fluxo = criarFluxoPadrao("Squad - SEGEPE e Folha", RESPONSAVEIS_SEGEPE);
+      } else if (numero >= 69 && numero <= 71) {
+        item.fluxo = criarFluxoPadrao("ACS", "Setor", "Squad - Portais", RESPONSAVEIS_PORTAIS);
+      } else if (numero >= 72 && numero <= 98) {
+        item.fluxo = criarFluxoPadrao("Squad - Processo Adm e Outros", RESPONSAVEIS_PROCESSO);
+      } else if (numero === 99) {
+        item.fluxo = criarFluxoPadrao("CITIC", "Todo Setor");
+      } else if (numero >= 100 && numero <= 102) {
+        item.fluxo = criarFluxoPadrao("NIA - Núcleo de Inteligência Artificial", RESPONSAVEIS_NIA);
+      } else if (numero === 103) {
+        item.fluxo = criarFluxoPadrao("DAU", RESPONSAVEIS_DAU, "DAU avaliar se repassa para Sílvio da EJUD", RESPONSAVEIS_PROCESSO);
+        item.obs = "Encaminhar para a fila DAU primeiro.";
+      } else if (numero === 104) {
+        item.fluxo = criarFluxoPadrao("DAU", RESPONSAVEIS_DAU, "Squad - Processo Adm e Outros / CITIC", RESPONSAVEIS_PROCESSO);
+        item.obs = "Encaminhar para a fila DAU primeiro.";
+      } else if (numero === 105) {
+        item.fluxo = criarFluxoPadrao("DAU", "Equipe DAU");
+      } else if (numero === 106) {
+        item.fluxo = criarFluxoPadrao("DAU", RESPONSAVEIS_DAU, "Squad - Processo Adm e Outros / CITIC", RESPONSAVEIS_PROCESSO);
+      }
+    }
+
+    DADOS_PADRAO.forEach(atualizarDadosPadrao);
 
     const sistemaPrejud = DADOS_PADRAO.find(item => item.id === "sys_10");
     sistemaPrejud.sistema = "Prejud";
@@ -371,7 +518,70 @@
       loadData();
     });
 
-    function loadData() {
+    function openAssetDatabase() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+          reject(new Error('IndexedDB não está disponível.'));
+          return;
+        }
+
+        const request = indexedDB.open('flow-assets', 1);
+        request.onupgradeneeded = function() {
+          if (!request.result.objectStoreNames.contains('assets')) {
+            request.result.createObjectStore('assets');
+          }
+        };
+        request.onsuccess = function() { resolve(request.result); };
+        request.onerror = function() { reject(request.error); };
+      });
+    }
+
+    async function storeLogoAsset(src) {
+      const database = await openAssetDatabase();
+      try {
+        await new Promise((resolve, reject) => {
+          const transaction = database.transaction('assets', 'readwrite');
+          transaction.objectStore('assets').put(src, 'custom-logo');
+          transaction.oncomplete = resolve;
+          transaction.onerror = function() { reject(transaction.error); };
+          transaction.onabort = function() { reject(transaction.error); };
+        });
+      } finally {
+        database.close();
+      }
+    }
+
+    async function loadLogoAsset() {
+      const legacyLogo = localStorage.getItem('flow_custom_logo');
+      try {
+        const database = await openAssetDatabase();
+        let savedLogo;
+        try {
+          savedLogo = await new Promise((resolve, reject) => {
+            const request = database.transaction('assets', 'readonly')
+              .objectStore('assets').get('custom-logo');
+            request.onsuccess = function() { resolve(request.result || ''); };
+            request.onerror = function() { reject(request.error); };
+          });
+        } finally {
+          database.close();
+        }
+
+        if (savedLogo) {
+          localStorage.removeItem('flow_custom_logo');
+          return savedLogo;
+        }
+        if (legacyLogo) {
+          await storeLogoAsset(legacyLogo);
+          localStorage.removeItem('flow_custom_logo');
+        }
+        return legacyLogo || '';
+      } catch (error) {
+        return legacyLogo || '';
+      }
+    }
+
+    async function loadData() {
       const storedData = localStorage.getItem("flow_custom_dados_v2") || localStorage.getItem("flow_custom_dados");
       let savedItems = [];
       try {
@@ -387,11 +597,6 @@
         if (!savedItem) return defaultItem;
 
         const mergedItem = { ...defaultItem, ...savedItem };
-        ["descricao", "url", "acesso", "responsavel", "obs"].forEach(field => {
-          if (!String(mergedItem[field] || "").trim() && defaultItem[field]) {
-            mergedItem[field] = defaultItem[field];
-          }
-        });
 
         if (defaultItem.id === "sys_10" && savedItem.sistema === "Prevjud") {
           mergedItem.sistema = defaultItem.sistema;
@@ -406,10 +611,9 @@
       });
 
       const knownIds = new Set(DADOS_PADRAO.map(item => item.id));
-      globalData.push(...savedItems.filter(item => !knownIds.has(item.id)));
-      localStorage.setItem("flow_custom_dados_v2", JSON.stringify(globalData));
+      globalData.push(...savedItems.filter(item => !knownIds.has(item.id) && !SISTEMAS_REMOVIDOS.has(item.id)));
 
-      const storedLogo = localStorage.getItem("flow_custom_logo");
+      const storedLogo = await loadLogoAsset();
       if (storedLogo) displayLogo(storedLogo);
 
       renderCards(globalData);
@@ -432,8 +636,68 @@
       return fluxo;
     }
 
-    function saveData() {
-      localStorage.setItem("flow_custom_dados_v2", JSON.stringify(globalData));
+    function saveData(data = globalData) {
+      try {
+        localStorage.setItem("flow_custom_dados_v2", JSON.stringify(data));
+        return true;
+      } catch (error) {
+        console.error('Erro ao salvar dados do FLOW:', error);
+        alert('Não foi possível gravar os dados neste navegador. Libere espaço de armazenamento e tente novamente.');
+        return false;
+      }
+    }
+
+    function exportDataBackup() {
+      const backup = {
+        format: 'flow-data-backup',
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        data: globalData
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `flow-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    async function importDataBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      try {
+        const backup = JSON.parse(await file.text());
+        const records = Array.isArray(backup) ? backup : backup?.data;
+        if (!Array.isArray(records) || !records.length ||
+            records.some(item => !item || typeof item.id !== 'string' || typeof item.sistema !== 'string')) {
+          throw new Error('O arquivo não contém uma cópia válida dos dados do FLOW.');
+        }
+
+        const seenIds = new Set();
+        const hasDuplicateIds = records.some(item => {
+          if (seenIds.has(item.id)) return true;
+          seenIds.add(item.id);
+          return false;
+        });
+        if (hasDuplicateIds) {
+          throw new Error('O backup contém registros duplicados.');
+        }
+
+        const restoredData = records.filter(item => !SISTEMAS_REMOVIDOS.has(item.id));
+        if (!confirm(`Este backup substituirá os dados deste navegador (${restoredData.length} registros). Deseja continuar?`)) return;
+        if (!saveData(restoredData)) return;
+
+        globalData = restoredData;
+        renderCards(globalData);
+        alert('Backup restaurado com sucesso neste navegador.');
+      } catch (error) {
+        console.error('Erro ao importar backup:', error);
+        alert(error.message || 'Não foi possível ler o arquivo de backup.');
+      } finally {
+        event.target.value = '';
+      }
     }
 
     function renderCards(data) {
@@ -481,22 +745,92 @@
           </div>`;
         container.innerHTML += cardHtml;
       });
+
+      if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        container.querySelectorAll('.card-item').forEach(card => {
+          card.addEventListener('pointermove', event => {
+            const bounds = card.getBoundingClientRect();
+            const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
+            const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
+            card.style.setProperty('--rotate-y', `${horizontal * 5}deg`);
+            card.style.setProperty('--rotate-x', `${vertical * -5}deg`);
+          });
+          card.addEventListener('pointerleave', () => {
+            card.style.setProperty('--rotate-x', '0deg');
+            card.style.setProperty('--rotate-y', '0deg');
+          });
+        });
+      }
     }
 
-    function handleLogoUpload(event) {
-      const file = event.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const base64 = e.target.result;
-        displayLogo(base64);
-        localStorage.setItem("flow_custom_logo", base64);
-      };
-      reader.readAsDataURL(file);
+    function compressLogoImage(file, maxWidth = 800, maxHeight = 800, quality = 0.72) {
+      return new Promise((resolve, reject) => {
+        if (!file || !file.type.startsWith('image/')) {
+          reject(new Error('Arquivo inválido.'));
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ratio = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+            canvas.width = Math.max(1, Math.round(img.width * ratio));
+            canvas.height = Math.max(1, Math.round(img.height * ratio));
+
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            const compressed = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressed);
+          };
+          img.onerror = function() {
+            reject(new Error('Não foi possível ler a imagem.'));
+          };
+          img.src = e.target.result;
+        };
+        reader.onerror = function() {
+          reject(new Error('Erro ao ler a imagem.'));
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleLogoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const maxLogoSizeBytes = 1024 * 1024;
+      if (file.size > maxLogoSizeBytes) {
+        alert('A logo é muito grande. Envie uma imagem até 1MB para manter o site estável.');
+        event.target.value = '';
+        return;
+      }
+
+      try {
+        const compressed = await compressLogoImage(file);
+        await storeLogoAsset(compressed);
+        localStorage.removeItem('flow_custom_logo');
+        displayLogo(compressed);
+      } catch (error) {
+        console.error('Erro ao processar logo:', error);
+        alert('Não foi possível salvar a logo neste navegador. Tente outra imagem ou libere espaço.');
+      }
     }
 
     function displayLogo(src) {
       const img = document.getElementById('logoImg'); const text = document.getElementById('logoText');
-      if (src) { img.src = src; img.style.display = 'block'; text.style.display = 'none'; }
+      if (src) {
+        img.src = src;
+        img.style.display = 'block';
+        text.style.display = 'none';
+      } else {
+        img.src = '';
+        img.style.display = 'none';
+        text.style.display = 'inline';
+      }
     }
 
     function toggleLogin() {
@@ -547,6 +881,8 @@
       document.getElementById('btnAdd').style.display = isAdmin ? 'inline-block' : 'none';
       document.getElementById('btnChangeLogo').style.display = isAdmin ? 'inline-block' : 'none';
       document.getElementById('btnChangePass').style.display = isAdmin ? 'inline-block' : 'none';
+      document.getElementById('btnExportBackup').style.display = isAdmin ? 'inline-block' : 'none';
+      document.getElementById('btnImportBackup').style.display = isAdmin ? 'inline-block' : 'none';
       document.querySelectorAll('.card-actions').forEach(el => el.style.display = isAdmin ? 'flex' : 'none');
     }
 
@@ -603,37 +939,30 @@
         }
       });
 
-      if (id) {
-        const item = globalData.find(x => x.id === id);
-        if (item) {
-          item.sistema = nome; item.acesso = document.getElementById('editAcesso').value;
-          item.descricao = document.getElementById('editDesc').value;
-          item.url = document.getElementById('editUrl').value;
-          item.responsavel = document.getElementById('editResponsavel').value;
-          item.obs = document.getElementById('editObs').value;
-          item.fluxo = fluxos;
-        }
-      } else {
-        globalData.push({
-          id: "custom_" + Date.now(), sistema: nome,
-          acesso: document.getElementById('editAcesso').value,
-          descricao: document.getElementById('editDesc').value,
-          url: document.getElementById('editUrl').value,
-          responsavel: document.getElementById('editResponsavel').value,
-          obs: document.getElementById('editObs').value,
-          fluxo: fluxos
-        });
-      }
+      const editedFields = {
+        sistema: nome,
+        acesso: document.getElementById('editAcesso').value,
+        descricao: document.getElementById('editDesc').value,
+        url: document.getElementById('editUrl').value,
+        responsavel: document.getElementById('editResponsavel').value,
+        obs: document.getElementById('editObs').value,
+        fluxo: fluxos
+      };
+      const nextData = id
+        ? globalData.map(item => item.id === id ? { ...item, ...editedFields } : item)
+        : [...globalData, { id: "custom_" + Date.now(), ...editedFields }];
 
-      saveData();
+      if (!saveData(nextData)) return;
+      globalData = nextData;
       closeEditModal();
       renderCards(globalData);
     }
 
     function deleteItem(id) {
       if (!confirm('Deseja excluir este registro?')) return;
-      globalData = globalData.filter(x => x.id !== id);
-      saveData();
+      const nextData = globalData.filter(x => x.id !== id);
+      if (!saveData(nextData)) return;
+      globalData = nextData;
       renderCards(globalData);
     }
 
