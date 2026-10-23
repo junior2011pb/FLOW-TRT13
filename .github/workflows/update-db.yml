@@ -1,0 +1,26 @@
+name: Update Database JSON
+
+on:
+  repository_dispatch:
+    types: [update-database]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: Atualizar dados.json
+        run: |
+          echo '${{ github.event.client_payload.data }}' > dados.json
+
+      - name: Salvar e dar Commit nas alterações
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: atualiza dados.json via sistema [skip ci]"
+          file_pattern: 'dados.json'
