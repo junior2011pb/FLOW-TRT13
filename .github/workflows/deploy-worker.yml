@@ -1,0 +1,63 @@
+name: Deploy FLOW API
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Generate Wrangler configuration
+        working-directory: worker
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GITHUB_APP_ID: ${{ vars.FLOW_GITHUB_APP_ID }}
+          GITHUB_INSTALLATION_ID: ${{ vars.FLOW_GITHUB_INSTALLATION_ID }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          FLOW_KV_NAMESPACE_ID: ${{ vars.FLOW_KV_NAMESPACE_ID }}
+          FLOW_FRONTEND_ORIGINS: ${{ vars.FLOW_FRONTEND_ORIGINS }}
+        run: |
+          node --input-type=module -e '
+            import { writeFileSync } from "node:fs";
+            const required = ["CLOUDFLARE_ACCOUNT_ID", "GITHUB_APP_ID", "GITHUB_INSTALLATION_ID", "FLOW_KV_NAMESPACE_ID", "FLOW_FRONTEND_ORIGINS"];
+            const missing = required.filter(key => !process.env[key]);
+            if (missing.length) throw new Error(`Configure GitHub secrets/variables: ${missing.join(", ")}`);
+            const config = `name = "flow-trt13-api"
+          main = "index.js"
+          compatibility_date = "2026-10-22"
+          account_id = "${process.env.CLOUDFLARE_ACCOUNT_ID}"
+          workers_dev = true
+
+          [vars]
+          GITHUB_REPOSITORY = "${process.env.GITHUB_REPOSITORY}"
+          GITHUB_BRANCH = "main"
+          GITHUB_APP_ID = "${process.env.GITHUB_APP_ID}"
+          GITHUB_INSTALLATION_ID = "${process.env.GITHUB_INSTALLATION_ID}"
+          FLOW_FRONTEND_ORIGINS = "${process.env.FLOW_FRONTEND_ORIGINS}"
+
+          [[kv_namespaces]]
+          binding = "FLOW_KV"
+          id = "${process.env.FLOW_KV_NAMESPACE_ID}"
+          `;
+            writeFileSync("wrangler.toml", config);
+          '
+      - name: Deploy Cloudflare Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: deploy
+          secrets: |
+            GITHUB_APP_PRIVATE_KEY
+            ADMIN_PASSWORD_HASH
+            SESSION_SIGNING_SECRET
+        env:
+          GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
+          ADMIN_PASSWORD_HASH: ${{ secrets.ADMIN_PASSWORD_HASH }}
+          SESSION_SIGNING_SECRET: ${{ secrets.SESSION_SIGNING_SECRET }}

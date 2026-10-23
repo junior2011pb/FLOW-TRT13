@@ -1,0 +1,15 @@
+name = "flow-trt13-api"
+main = "index.js"
+compatibility_date = "2026-10-22"
+workers_dev = true
+
+[vars]
+GITHUB_REPOSITORY = "junior2011pb/FLOW-TRT13"
+GITHUB_BRANCH = "main"
+GITHUB_APP_ID = "SET_GITHUB_APP_ID"
+GITHUB_INSTALLATION_ID = "SET_INSTALLATION_ID"
+FLOW_FRONTEND_ORIGINS = "https://junior2011pb.github.io"
+
+[[kv_namespaces]]
+binding = "FLOW_KV"
+id = "SET_CLOUDFLARE_KV_NAMESPACE_ID"
