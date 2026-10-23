@@ -1,1 +1,2 @@
-window.FLOW_API_BASE_URL = '';
+// Configuração do Banco do GitHub
+window.GH_TOKEN = "SUA_CHAVE_DO_GITHUB_AQUI";
