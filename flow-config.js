@@ -1,4 +1,4 @@
 window.FLOW_CONFIG = {
-  isConfigured: true,
-  mode: "stable"
+  supabaseUrl: 'https://usnpbeipfcyvbhzjtkjd.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzbnBiZWlwZmN5dmJoemp0a2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMTY3MTEsImV4cCI6MjEwODU5MjcxMX0.LA7XRP_XwzohlKxPkXTzVjQLZz1L5L85bYTo80kaw3Y'
 };

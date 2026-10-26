@@ -218,9 +218,6 @@
       .logo-container { min-width: 0; }
     }
   </style>
-  <script src="flow-config.js"></script>
-  <script src="github-db.js"></script>
-  <script src="patch-ui.js"></script>
 </head>
 <body>
 
@@ -275,7 +272,7 @@
   <div id="loginModal" class="modal-overlay">
     <div class="modal" style="max-width: 400px;">
       <h3>Acesso Administrativo</h3>
-      <div class="form-group"><label>Usuário</label><input type="text" id="loginUser"></div>
+      <div class="form-group"><label for="loginUser">E-mail</label><input type="email" id="loginUser" autocomplete="username"></div>
       <div class="form-group"><label>Senha</label><input type="password" id="loginPass"></div>
       <div id="loginError" style="color:red; font-size:0.8rem; display:none; margin-bottom:10px;">Credenciais inválidas.</div>
       <div class="modal-actions">
@@ -323,6 +320,9 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./flow-config.js"></script>
+  <script src="./github-db.js"></script>
   <script>
     let globalData = [];
     let isAdmin = false;
@@ -331,16 +331,20 @@
     let assetRevision = null;
     let deletedDataIds = new Set();
     let hasPendingLocalMigration = false;
-    const FLOW_API_BASE_URL = String(window.FLOW_API_BASE_URL || '').replace(/\/+$/, '');
+    const SUPABASE_READY = Boolean(window.flowDb?.isConfigured);
 
     async function flowApi(path, options = {}) {
-      if (!FLOW_API_BASE_URL) throw new Error('A API do backend ainda não foi configurada.');
-      const headers = { 'Content-Type': 'application/json', ...options.headers };
-      if (adminSessionToken) headers.Authorization = `Bearer ${adminSessionToken}`;
-      const response = await fetch(`${FLOW_API_BASE_URL}${path}`, { ...options, headers, cache: 'no-store' });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.error || `Erro da API (${response.status}).`);
-      return result;
+      if (!SUPABASE_READY) throw new Error('Supabase não está configurada neste frontend.');
+      const method = options.method || 'GET';
+      const body = options.body ? JSON.parse(options.body) : {};
+      if (path === '/api/login' && method === 'POST') return flowDb.entrarAdmin(body.username, body.password);
+      if (path === '/api/session' && method === 'GET') return flowDb.restaurarSessao();
+      if (path === '/api/data' && method === 'GET') return flowDb.carregarDados();
+      if (path === '/api/data' && method === 'PUT') return flowDb.salvarDados(body.records, body.revision);
+      if (path === '/api/assets' && method === 'GET') return flowDb.carregarAssets();
+      if (path === '/api/assets' && method === 'PUT') return flowDb.salvarLogo(body.logoData, body.revision);
+      if (path === '/api/password' && method === 'POST') return flowDb.alterarSenha(body.currentPassword, body.newPassword);
+      throw new Error('Operação Supabase não reconhecida.');
     }
 
     function setBackendStatus(message, isConnected = false) {
@@ -596,8 +600,25 @@
     document.addEventListener("DOMContentLoaded", function() {
       setDisplayMode(localStorage.getItem('flow_display_mode') || 'normal', false);
       setTheme(localStorage.getItem('flow_theme') || 'light', false);
-      loadData();
+      initializeFlow();
     });
+
+    async function initializeFlow() {
+      if (SUPABASE_READY) {
+        try {
+          const session = await flowDb.restaurarSessao();
+          adminSessionToken = session.token || '';
+          isAdmin = session.authenticated;
+          updateAdminUI();
+        } catch (error) {
+          setBackendStatus(`Sessão Supabase indisponível: ${error.message}`);
+        }
+      } else if (localStorage.getItem('flow_is_admin') === 'true') {
+        isAdmin = true;
+        updateAdminUI();
+      }
+      await loadData();
+    }
 
     function setDisplayMode(mode, persist = true) {
       const selectedMode = mode === '3d' ? '3d' : 'normal';
@@ -659,11 +680,11 @@
 
     async function loadLogoAsset() {
       const legacyLogo = localStorage.getItem('flow_custom_logo');
-      if (FLOW_API_BASE_URL) {
+      if (SUPABASE_READY) {
         try {
           const result = await flowApi('/api/assets', { method: 'GET' });
-          assetRevision = result.revision || null;
-          if (result.assets?.logo) return result.assets.logo;
+          assetRevision = result.revision ?? 0;
+          if (result.logo_data) return result.logo_data;
         } catch (error) {
           console.error('Erro ao carregar logo compartilhada:', error);
         }
@@ -707,12 +728,12 @@
         console.warn('Os dados locais existentes não puderam ser interpretados.', error);
       }
 
-      if (FLOW_API_BASE_URL) {
+      if (SUPABASE_READY) {
         try {
           const response = await flowApi('/api/data', { method: 'GET' });
           savedItems = Array.isArray(response.records) ? response.records : [];
           apiRevision = response.revision || null;
-          setBackendStatus('Conectado ao banco compartilhado; os dados exibidos vêm do repositório.', true);
+          setBackendStatus('Conectado ao Supabase; os dados compartilhados foram carregados.', true);
           if (!savedItems.length && localItems.length) {
             savedItems = localItems;
             hasPendingLocalMigration = true;
@@ -776,9 +797,9 @@
     }
 
     async function saveData(data = globalData) {
-      if (!FLOW_API_BASE_URL) {
-        setBackendStatus('Gravação bloqueada: configure a API do backend. Nenhum dado foi enviado nem apresentado como salvo.');
-        alert('O banco compartilhado ainda não está configurado. Nenhuma alteração foi gravada. Os dados antigos do navegador continuam preservados.');
+      if (!SUPABASE_READY) {
+        setBackendStatus('Supabase não configurada: nenhuma alteração foi enviada ao banco.');
+        alert('Supabase não configurada. Nenhuma alteração foi gravada. Os dados antigos do navegador continuam preservados.');
         return false;
       }
       if (!isAdmin || !adminSessionToken) {
@@ -796,7 +817,7 @@
           body: JSON.stringify({ records: recordsToSave, revision: apiRevision })
         });
         apiRevision = result.revision;
-        setBackendStatus('Dados gravados no repositório compartilhado.', true);
+        setBackendStatus('Dados gravados no Supabase.', true);
         return true;
       } catch (error) {
         console.error('Erro ao salvar dados do FLOW no backend:', error);
@@ -812,7 +833,7 @@
       if (!await saveData(globalData)) return;
       hasPendingLocalMigration = false;
       updateAdminUI();
-      setBackendStatus('Dados locais migrados para o repositório compartilhado.', true);
+      setBackendStatus('Dados locais migrados para o Supabase.', true);
     }
 
     function exportDataBackup() {
@@ -988,21 +1009,21 @@
 
       try {
         const compressed = await compressLogoImage(file);
-        if (FLOW_API_BASE_URL && isAdmin && adminSessionToken) {
+        if (SUPABASE_READY && isAdmin && adminSessionToken) {
           const result = await flowApi('/api/assets', {
             method: 'PUT',
-            body: JSON.stringify({ assets: { logo: compressed }, revision: assetRevision })
+            body: JSON.stringify({ logoData: compressed, revision: assetRevision })
           });
           assetRevision = result.revision;
           displayLogo(compressed);
-          setBackendStatus('Logo gravada no repositório compartilhado.', true);
+          setBackendStatus('Logo gravada no Supabase.', true);
           return;
         }
 
         await storeLogoAsset(compressed);
         localStorage.removeItem('flow_custom_logo');
         displayLogo(compressed);
-        if (!FLOW_API_BASE_URL) setBackendStatus('Logo salva apenas neste navegador; configure o backend para compartilhá-la.');
+        if (!SUPABASE_READY) setBackendStatus('Logo salva apenas neste navegador; configure o Supabase para compartilhá-la.');
       } catch (error) {
         console.error('Erro ao processar logo:', error);
         alert(`Não foi possível salvar a logo. ${error.message || 'Tente outra imagem ou libere espaço.'}`);
@@ -1022,8 +1043,14 @@
       }
     }
 
-    function toggleLogin() {
+    async function toggleLogin() {
       if (isAdmin) {
+        if (SUPABASE_READY) {
+          try { await flowDb.sairAdmin(); } catch (error) {
+            alert(`Não foi possível encerrar a sessão Supabase: ${error.message}`);
+            return;
+          }
+        }
         isAdmin = false;
         adminSessionToken = '';
         updateAdminUI();
@@ -1038,7 +1065,7 @@
       const loginError = document.getElementById('loginError');
       loginError.style.display = 'none';
 
-      if (!FLOW_API_BASE_URL) {
+      if (!SUPABASE_READY) {
         const legacyPassword = localStorage.getItem("flow_senha_admin") || "admin12345678";
         if (u === 'admin' && p === legacyPassword) {
           isAdmin = true;
@@ -1053,16 +1080,13 @@
       }
 
       try {
-        const result = await flowApi('/api/login', {
-          method: 'POST',
-          body: JSON.stringify({ username: u, password: p })
-        });
+        const result = await flowDb.entrarAdmin(u, p);
         adminSessionToken = result.token;
         isAdmin = true;
         closeLoginModal();
         updateAdminUI();
       } catch (error) {
-        loginError.textContent = error.message || 'Não foi possível autenticar no backend.';
+        loginError.textContent = error.message || 'Não foi possível autenticar no Supabase.';
         loginError.style.display = 'block';
       }
     }
@@ -1074,20 +1098,17 @@
     async function submitChangePass() {
       const a = document.getElementById('passAtual').value;
       const n = document.getElementById('passNova').value;
-      if (!FLOW_API_BASE_URL || !adminSessionToken) {
-        alert('A troca de senha exige o backend configurado e uma sessão administrativa autenticada.');
+      if (!SUPABASE_READY || !adminSessionToken) {
+        alert('A troca de senha exige uma sessão administrativa autenticada no Supabase.');
         return;
       }
 
       try {
-        await flowApi('/api/password', {
-          method: 'POST',
-          body: JSON.stringify({ currentPassword: a, newPassword: n })
-        });
-        alert('Senha alterada no backend com sucesso.');
+        await flowDb.alterarSenha(a, n);
+        alert('Senha alterada no Supabase com sucesso.');
         closeChangePassModal();
       } catch (error) {
-        alert(error.message || 'Não foi possível alterar a senha no backend.');
+        alert(error.message || 'Não foi possível alterar a senha no Supabase.');
       }
     }
 
