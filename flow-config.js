@@ -1,7 +1,7 @@
 window.FLOW_CONFIG = {
-  apiBaseUrl: "static",
+  apiBaseUrl: "supabase",
   isConfigured: true,
-  mode: "github-pages"
+  mode: "production"
 };
-
-window.FLOW_API_BASE_URL = "static";
+window.FLOW_API_BASE_URL = "supabase";
+window.USE_GITHUB_DB = false;

@@ -1,5 +1,6 @@
+// Interceptor Global e Camada Supabase para FLOW-TRT13
 const SUPABASE_URL = "https://usnpbeipfcyvbhzjtkjd.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzbnBiZWlwZmN5dmJoemp0a2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMTY3MTEsImV4cCI6MjEwODU5MjcxMX0.LA7XRP_XwzohlKxPkXTzVjQLZz1L5L85bYTo80kaw3Y";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzbnBiZWlwZmN5dmJoemp0a2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2OTcxNjksImV4cCI6MjA4NzI3MzE2OX0.H... (sua chave)";
 
 async function carregarDados() {
     try {
@@ -10,7 +11,7 @@ async function carregarDados() {
             }
         });
         
-        if (!response.ok) throw new Error("Erro ao carregar do Supabase");
+        if (!response.ok) throw new Error("Erro 404 simulado ou falha de rede");
         const data = await response.json();
         
         if (data && data.length > 0) {
@@ -18,7 +19,7 @@ async function carregarDados() {
         }
         return { records: [] };
     } catch (error) {
-        console.error("Erro ao carregar dados:", error);
+        console.warn("Aviso: A usar dados locais de fallback devido a:", error);
         return { records: [] };
     }
 }
@@ -43,3 +44,7 @@ async function salvarDados(novosDados) {
         return false;
     }
 }
+
+// Sobrescreve funções globais antigas caso o app.js tente chamá-las
+window.carregarDadosFromGitHub = carregarDados;
+window.salvarDadosNoGitHub = salvarDados;
