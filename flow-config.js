@@ -1,8 +1,8 @@
-// Configuração do Banco de Dados via GitHub
 window.FLOW_CONFIG = {
-  apiBaseUrl: "https://api.github.com",
+  apiBaseUrl: "",
   isConfigured: true,
-  provider: "github"
+  mode: "github-static"
 };
 
-window.FLOW_API_BASE_URL = "https://api.github.com";
+window.FLOW_API_BASE_URL = "";
+window.USE_GITHUB_DB = true;
