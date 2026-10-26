@@ -1,2 +1,2 @@
-// Configuração do Banco do GitHub
-window.GH_TOKEN = "SUA_CHAVE_DO_GITHUB_AQUI";
+// Defina aqui somente a URL pública do Worker. Nunca coloque tokens neste arquivo.
+window.FLOW_API_BASE_URL = '';
