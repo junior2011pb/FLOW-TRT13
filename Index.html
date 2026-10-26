@@ -733,7 +733,7 @@
         try {
           const response = await flowApi('/api/data', { method: 'GET' });
           savedItems = Array.isArray(response.records) ? response.records : [];
-          apiRevision = response.revision || null;
+          apiRevision = response.revision ?? 0;
           setBackendStatus('Conectado ao Supabase; os dados compartilhados foram carregados.', true);
           if (!savedItems.length && localItems.length) {
             savedItems = localItems;
