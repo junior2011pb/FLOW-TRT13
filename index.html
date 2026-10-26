@@ -350,7 +350,7 @@
     function setBackendStatus(message, isConnected = false) {
       const status = document.getElementById('backendStatus');
       status.textContent = message;
-      status.hidden = !message;
+      status.hidden = isConnected || !message;
       status.classList.toggle('is-connected', isConnected);
     }
 
