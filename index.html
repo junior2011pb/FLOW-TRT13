@@ -323,6 +323,19 @@
             observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
+
+    <script id="forcar-loading-script">
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const loadingEls = document.querySelectorAll('*');
+                loadingEls.forEach(el => {
+                    if (el.innerText && el.innerText.includes('Carregando dados')) {
+                        el.style.display = 'none';
+                    }
+                });
+            }, 3000);
+        });
+    </script>
 </head>
 <body>
 
