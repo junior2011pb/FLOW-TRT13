@@ -224,6 +224,56 @@
       .logo-container img { animation: none; }
     }
   </style>
+
+    <style>
+        @keyframes logoMoveAnim {
+            0% { transform: translateY(0px) scale(1.2); }
+            50% { transform: translateY(-3px) scale(1.23); }
+            100% { transform: translateY(0px) scale(1.2); }
+        }
+        @keyframes glowMove {
+            0% { text-shadow: 0 0 5px rgba(66,153,225,0.6), 0 0 10px rgba(66,153,225,0.4); transform: scale(1); }
+            50% { text-shadow: 0 0 15px rgba(72,187,120,0.8), 0 0 25px rgba(72,187,120,0.6); transform: scale(1.03); }
+            100% { text-shadow: 0 0 5px rgba(66,153,225,0.6), 0 0 10px rgba(66,153,225,0.4); transform: scale(1); }
+        }
+        .animated-logo {
+            animation: logoMoveAnim 3s ease-in-out infinite alternate !important;
+            transform-origin: left center;
+        }
+        .animated-title {
+            animation: glowMove 3s infinite alternate !important;
+        }
+    </style>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            // Anima o logo superior
+            const logos = document.querySelectorAll('header img, .logo, [class*="logo"], a img, header > div:first-child');
+            logos.forEach(l => l.classList.add('animated-logo'));
+
+            // Anima o título FLOW
+            const titles = document.querySelectorAll('h1, h2, .title, span');
+            titles.forEach(t => {
+                if (t.textContent.trim() === 'FLOW') {
+                    t.classList.add('animated-title');
+                }
+            });
+
+            // Adiciona o botão do GLPI ao lado de Base Pública
+            const botoesTopo = document.querySelectorAll('a, button');
+            botoesTopo.forEach(el => {
+                if (el.textContent.includes('Base Pública') && !document.getElementById('btn-glpi-custom')) {
+                    const glpiBtn = document.createElement('a');
+                    glpiBtn.id = 'btn-glpi-custom';
+                    glpiBtn.href = 'https://centraldeservicos.trt13.jus.br/front/ticket.php';
+                    glpiBtn.target = '_blank';
+                    glpiBtn.textContent = 'GLPI';
+                    glpiBtn.className = el.className;
+                    glpiBtn.style.cssText = 'margin-left: 8px; margin-right: 8px; display: inline-flex; align-items: center; justify-content: center; background-color: #2b6cb0; color: #fff; text-decoration: none;';
+                    el.parentNode.insertBefore(glpiBtn, el.nextSibling);
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 
