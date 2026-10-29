@@ -290,6 +290,21 @@
         });
     </script>
 
+
+    <script id="remover-aviso-script">
+        window.addEventListener('DOMContentLoaded', () => {
+            const esconderTarja = () => {
+                document.querySelectorAll('div, span, p').forEach(el => {
+                    if (el.innerText && el.innerText.includes('Banco compartilhado ainda não configurado')) {
+                        el.style.display = 'none';
+                    }
+                });
+            };
+            esconderTarja();
+            setTimeout(esconderTarja, 500);
+            setTimeout(esconderTarja, 1500);
+        });
+    </script>
 </head>
 <body>
 
