@@ -212,6 +212,8 @@
     .backend-status { max-width: 1250px; margin: 16px auto 0; padding: 10px 16px; border: 1px solid #f0cd79; border-radius: 6px; color: #654b10; background: #fff5d9; font-size: .82rem; }
     .backend-status[hidden] { display: none; }
     html[data-theme="dark"] .backend-status { color: #ffe7a8; background: #3b311c; border-color: #75602d; }
+    .system-count-badge { position: absolute; right: max(18px, calc((100vw - 1300px) / 2)); bottom: 12px; z-index: 1; padding: 7px 12px; border: 1px solid rgba(255,255,255,.32); border-radius: 6px; color: #edf7ff; background: rgba(5,42,77,.62); font-size: .76rem; font-weight: 700; white-space: nowrap; }
+    @media (max-width: 760px) { .system-count-badge { position: static; width: max-content; max-width: 100%; margin: 12px auto 0; } }
     @media (hover: none), (pointer: coarse) {
       body[data-view-mode="3d"] .card, body[data-view-mode="3d"] .card:hover { transform: none; }
       body[data-view-mode="3d"] .card > div { transform: none; }
@@ -275,55 +277,6 @@
         });
     </script>
 
-    <style>
-        #total-sistemas-badge {
-            float: right;
-            margin: 10px 20px 0 0;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 6px 14px;
-            border-radius: 8px;
-            color: #fff;
-            font-weight: bold;
-            font-size: 14px;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 100;
-            position: relative;
-        }
-    </style>
-    <script id="contador-sistemas-script">
-        window.addEventListener('DOMContentLoaded', () => {
-            function atualizarContador() {
-                // Seleciona os cards de sistemas renderizados na tela
-                const cards = document.querySelectorAll('.card, [class*="card"], [class*="system"], [class*="sistema"]');
-                // Filtra para pegar apenas os cards principais de conteúdo
-                const total = Array.from(cards).filter(el => el.offsetHeight > 50 && el.innerText.length > 20).length;
-                
-                let badge = document.getElementById('total-sistemas-badge');
-                if (!badge) {
-                    badge = document.createElement('div');
-                    badge.id = 'total-sistemas-badge';
-                    // Insere logo acima da listagem de cards, alinhado à direita
-                    const searchBar = document.querySelector('input[type="text"], input[placeholder*="Pesquisar"], .search-container');
-                    if (searchBar && searchBar.parentNode) {
-                        searchBar.parentNode.parentNode.insertBefore(badge, searchBar.parentNode.nextSibling);
-                    } else {
-                        document.body.insertBefore(badge, document.body.firstChild);
-                    }
-                }
-                badge.textContent = `TOTAL DE SISTEMAS CADASTRADOS: ${total > 0 ? total : cards.length}`;
-            }
-
-            // Executa após o carregamento e monitora mudanças dinâmicas
-            setTimeout(atualizarContador, 1000);
-            setTimeout(atualizarContador, 2500);
-            
-            const observer = new MutationObserver(atualizarContador);
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
-    </script>
-
     <script id="forcar-loading-script">
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
@@ -337,48 +290,6 @@
         });
     </script>
 
-    <style>
-        #total-sistemas-contador {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 6px 12px;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 13px;
-            font-weight: bold;
-            z-index: 999;
-        }
-        @media (max-width: 768px) {
-            #total-sistemas-contador {
-                position: relative;
-                top: auto;
-                right: auto;
-                margin: 10px auto;
-                text-align: center;
-                display: table;
-            }
-        }
-    </style>
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            setInterval(() => {
-                const cards = document.querySelectorAll('.card, [class*="card"], [class*="system"]');
-                const validCards = Array.from(cards).filter(el => el.offsetHeight > 40);
-                const count = validCards.length > 0 ? validCards.length : 0;
-                
-                let badge = document.getElementById('total-sistemas-contador');
-                if (!badge) {
-                    badge = document.createElement('div');
-                    badge.id = 'total-sistemas-contador';
-                    document.body.appendChild(badge);
-                }
-                badge.textContent = `Total de Sistemas Cadastrados: ${count}`;
-            }, 1000);
-        });
-    </script>
 </head>
 <body>
 
@@ -420,6 +331,7 @@
         <span aria-hidden="true">&#9681;</span><span id="themeToggleText">Escuro</span>
       </button>
     </div>
+    <div id="system-count-badge" class="system-count-badge" role="status" aria-live="polite">Total de sistemas: carregando...</div>
   </div>
 
   <div id="backendStatus" class="backend-status" role="status" hidden></div>
@@ -429,7 +341,6 @@
     <div id="cardsContainer" class="grid" style="display:none;"></div>
     <div id="noResults" class="status-msg" style="display:none;">Nenhum registro encontrado para o termo pesquisado.</div>
   </div>
-
   <!-- Modais -->
   <div id="loginModal" class="modal-overlay">
     <div class="modal" style="max-width: 400px;">
@@ -1105,6 +1016,9 @@
           </div>`;
         container.innerHTML += cardHtml;
       });
+
+      const count = data.length;
+      document.getElementById('system-count-badge').textContent = `TOTAL DE SISTEMAS: ${count}`;
 
       if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
         container.querySelectorAll('.card-item').forEach(card => {
